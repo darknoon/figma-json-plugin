@@ -1,0 +1,23 @@
+{
+  "name": "figma-dump",
+  "version": "0.0.1",
+  "description": "Dump a hierarchy to JSON within a Figma document. Intended for use within Figma plugins.",
+  "main": "dist/main.js",
+  "browser": "dist/browser.js",
+  "author": "Andrew Pouliot",
+  "license": "MIT",
+  "scripts": {
+    "gen-schema": "node dist/genSchema.js src/schema.json",
+    "dev": "NODE_ENV=development webpack --mode=development --watch",
+    "build": "NODE_ENV=production tsc && webpack --mode=production",
+    "release:patch": "npm version patch && npm run build && npm publish",
+    "release:dev": "npm version prerelease && npm run build && npm publish --tag dev"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.11",
+    "ts-loader": "^6.2.0",
+    "typescript": "^3.6.3",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9"
+  }
+}
