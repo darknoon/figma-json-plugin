@@ -7,7 +7,6 @@
   "author": "Andrew Pouliot",
   "license": "MIT",
   "scripts": {
-    "gen-schema": "node dist/genSchema.js src/schema.json",
     "dev": "NODE_ENV=development webpack --mode=development --watch",
     "build": "NODE_ENV=production tsc && webpack --mode=production",
     "release:patch": "npm version patch && npm run build && npm publish",

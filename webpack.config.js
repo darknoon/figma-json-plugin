@@ -29,30 +29,6 @@ module.exports = (env, argv) => {
     },
     {
       ...baseConfig,
-      target: "node",
-      entry: {
-        code: "./src/genSchema.ts"
-      },
-      output: {
-        ...baseConfig.output,
-        filename: "genSchema.js"
-      },
-      plugins: [...baseConfig.plugins]
-    },
-    {
-      ...baseConfig,
-      target: "node",
-      entry: {
-        code: "./src/genSchema2.ts"
-      },
-      output: {
-        ...baseConfig.output,
-        filename: "genSchema2.js"
-      },
-      plugins: [...baseConfig.plugins]
-    },
-    {
-      ...baseConfig,
       entry: "./src/index.ts",
       output: {
         ...baseConfig.output,
