@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "declarationDir": "dist",
-    "target": "es2019",
+    "target": "es2016",
     "lib": ["es2019", "dom"],
     "strict": true,
     "declaration": true,

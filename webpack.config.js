@@ -19,7 +19,7 @@ module.exports = (env, argv) => {
     {
       ...baseConfig,
       entry: {
-        code: "./plugin/code.ts"
+        code: "./plugin/plugin.ts"
       },
       output: {
         ...baseConfig.output,
