@@ -1,5 +1,6 @@
 import { fromEntries } from "./polyfill";
 
+// Anything that is readonly on a SceneNode should not be set!
 export const blacklist = new Set([
   "parent",
   "removed",
