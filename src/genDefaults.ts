@@ -1,4 +1,4 @@
-import { dump, DumpedFigma } from "./index";
+import { dump } from "./index";
 import { fromEntries } from "./polyfill";
 
 export default async function genDefaults() {
