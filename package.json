@@ -8,10 +8,15 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development webpack --mode=development --watch",
-    "build": "NODE_ENV=production tsc && webpack --mode=production",
+    "build": "NODE_ENV=production webpack --mode=production",
+    "clean": "rm -rf dist",
     "release:patch": "npm version patch && npm run build && npm publish",
     "release:dev": "npm version prerelease && npm run build && npm publish --tag dev"
   },
+  "files": [
+    "dist/main.js",
+    "dist/src"
+  ],
   "devDependencies": {
     "@types/node": "^12.7.11",
     "@types/react": "^16.9.11",

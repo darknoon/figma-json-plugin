@@ -18,6 +18,7 @@ module.exports = (env, argv) => {
   };
 
   return [
+    // Output the plugin and UI code
     {
       ...baseConfig,
       entry: {
@@ -39,16 +40,7 @@ module.exports = (env, argv) => {
         new HtmlWebpackInlineSourcePlugin()
       ]
     },
-    {
-      ...baseConfig,
-      entry: "./src/index.ts",
-      output: {
-        ...baseConfig.output,
-        library: "figmaDump",
-        libraryTarget: "var",
-        filename: "browser.js"
-      }
-    },
+    // Output the pure library code (to be used by other figma plugins)
     {
       ...baseConfig,
       optimization: {
@@ -57,7 +49,7 @@ module.exports = (env, argv) => {
       entry: "./src/index.ts",
       output: {
         ...baseConfig.output,
-        // library: "figmaDump",
+        library: "figmaDump",
         // libraryExport: "figmaDump",
         libraryTarget: "commonjs",
         filename: "main.js"
