@@ -1,6 +1,6 @@
 {
   "name": "figma-json-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2-0",
   "description": "Dump a hierarchy to JSON within a Figma document. Intended for use within Figma plugins.",
   "main": "dist/main.js",
   "browser": "dist/browser.js",
