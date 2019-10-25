@@ -1,8 +1,12 @@
 import { dump, insert } from "../src";
+// import genDefaults from "../src/genDefaults";
 
 // Waiting for top-level await in Chrome…
 (async () => {
   try {
+    // const defaults = await genDefaults();
+    // console.log("defaults", defaults);
+
     // Dump document selection to JSON
     const dumped = await dump(figma.currentPage.selection);
     console.log(
