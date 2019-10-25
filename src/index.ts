@@ -118,7 +118,7 @@ async function loadFonts(n: DumpedFigma): Promise<void> {
 }
 
 export async function insert(n: DumpedFigma): Promise<SceneNode[]> {
-  const offset = { x: 300, y: 300 };
+  const offset = { x: 0, y: 0 };
 
   await loadFonts(n);
 
