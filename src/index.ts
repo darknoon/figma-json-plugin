@@ -1,4 +1,7 @@
+// Copyright 2019 Andrew Pouliot
 import { fromEntries } from "./polyfill";
+import { DumpedFigma, Base64String } from "./figmaJSON";
+import { fromByteArray, toByteArray } from "base64-js";
 
 // Anything that is readonly on a SceneNode should not be set!
 export const blacklist = new Set([
@@ -9,11 +12,6 @@ export const blacklist = new Set([
   "absoluteTransform",
   "hasMissingFont"
 ]);
-
-export interface DumpedFigma {
-  objects: SceneNode[];
-  images: { [hash: string]: Uint8Array };
-}
 
 function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
@@ -69,18 +67,20 @@ export async function dump(n: readonly SceneNode[]): Promise<DumpedFigma> {
 
   const objects = n.map(_dump);
 
-  const dataRequests = [...imageHashes].map(async hash => {
+  const dataRequests = [...imageHashes].map(async (hash: string) => {
     const im = figma.getImageByHash(hash);
     const dat = await im.getBytesAsync();
+    const base64 = fromByteArray(dat);
     // Tell typescript it's a tuple not an array (fromEntries type error)
-    return [hash, dat] as [string, Uint8Array];
+    return [hash, base64] as [string, Base64String];
   });
 
   const images = fromEntries(await Promise.all(dataRequests));
 
   return {
     objects,
-    images
+    images: {}
+    // images
   };
 }
 
@@ -125,10 +125,11 @@ export async function insert(n: DumpedFigma): Promise<SceneNode[]> {
   // Create all images
   console.log("creating images.");
   const imt = Object.entries(n.images);
-  const figim = imt.map(([hash, buffer]) => {
+  const figim = imt.map(([hash, base64]) => {
     let im: Image = figma.getImageByHash(hash);
     if (!im) {
       console.log("creating image: ", im);
+      const buffer = toByteArray(base64);
       im = figma.createImage(buffer);
     } else {
       console.log("have image: ", im);

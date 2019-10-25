@@ -84,7 +84,8 @@ class UI extends React.Component {
       return (
         <>
           <Toolbar onInsert={this.onInsert} />
-          <ReactJson src={dump} name={null} />
+          <p>{JSON.stringify(dump)}</p>
+          {/* <ReactJson src={dump} name={null} /> */}
         </>
       );
     }

@@ -1,4 +1,4 @@
-import { DumpedFigma } from "../src";
+import { DumpedFigma } from "../src/figmaJSON";
 
 /// Messages UI code sends to Plugin
 
