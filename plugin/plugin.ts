@@ -1,4 +1,5 @@
-import { dump, insert, DumpedFigma } from "../src";
+import { dump, insert } from "../src";
+import { DumpedFigma } from "../src/figmaJSON";
 import genDefaults from "../src/genDefaults";
 import { UIToPluginMessage, PluginToUIMessage } from "./pluginMessage";
 
