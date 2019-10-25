@@ -17,6 +17,10 @@
     "dist/main.js",
     "dist/src"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/darknoon/figma-json-plugin"
+  },
   "devDependencies": {
     "@types/node": "^12.7.11",
     "@types/react": "^16.9.11",
@@ -25,12 +29,11 @@
     "html-webpack-plugin": "^3.2.0",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "react-json-view": "^1.19.1",
     "ts-loader": "^6.2.0",
     "typescript": "^3.6.3",
     "webpack": "^4.41.0",
     "webpack-cli": "^3.3.9"
   },
-  "dependencies": {
-    "react-json-view": "^1.19.1"
-  }
+  "dependencies": {}
 }
