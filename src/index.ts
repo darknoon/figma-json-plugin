@@ -56,8 +56,12 @@ export async function dump(n: readonly SceneNode[]): Promise<DumpedFigma> {
       }
       case "function":
         return undefined;
-      //   case "symbol":
-      //     return n.description;
+      case "symbol":
+        if (n === figma.mixed) {
+          return "__Symbol(figma.mixed)__";
+        } else {
+          return String(n);
+        }
       default:
         return n;
     }
@@ -114,7 +118,7 @@ async function loadFonts(n: DumpedFigma): Promise<void> {
 }
 
 export async function insert(n: DumpedFigma): Promise<SceneNode[]> {
-  const offset = { x: 300, y: 300 };
+  const offset = { x: 0, y: 0 };
 
   await loadFonts(n);
 
