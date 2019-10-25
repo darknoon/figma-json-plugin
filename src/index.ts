@@ -56,8 +56,12 @@ export async function dump(n: readonly SceneNode[]): Promise<DumpedFigma> {
       }
       case "function":
         return undefined;
-      //   case "symbol":
-      //     return n.description;
+      case "symbol":
+        if (n === figma.mixed) {
+          return "__Symbol(figma.mixed)__";
+        } else {
+          return String(n);
+        }
       default:
         return n;
     }

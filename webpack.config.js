@@ -1,4 +1,6 @@
 const webpack = require("webpack");
+const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
 module.exports = (env, argv) => {
@@ -19,13 +21,23 @@ module.exports = (env, argv) => {
     {
       ...baseConfig,
       entry: {
-        code: "./plugin/plugin.ts"
+        ui: "./plugin/ui.tsx", // The entry point for your UI code
+        plugin: "./plugin/plugin.ts"
       },
       output: {
         ...baseConfig.output,
-        filename: "plugin.js"
+        filename: "[name].js"
       },
-      plugins: [...baseConfig.plugins]
+      plugins: [
+        ...baseConfig.plugins,
+        new HtmlWebpackPlugin({
+          template: "./plugin/ui.html",
+          filename: "ui.html",
+          inlineSource: ".(js)$",
+          chunks: ["ui"]
+        }),
+        new HtmlWebpackInlineSourcePlugin()
+      ]
     },
     {
       ...baseConfig,

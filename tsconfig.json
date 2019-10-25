@@ -2,8 +2,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "declarationDir": "dist",
-    "target": "es2016",
-    "lib": ["es2019", "dom"],
+    "target": "es6",
+    "lib": ["es2016", "dom"],
+    "jsx": "react",
     "strict": true,
     "declaration": true,
     "experimentalDecorators": true,

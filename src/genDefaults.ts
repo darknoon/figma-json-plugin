@@ -12,16 +12,16 @@ export default async function genDefaults() {
     TEXT: figma.createText(),
     FRAME: figma.createFrame(),
     // Is this a component instance or original component???
-    COMPONENT: figma.createComponent(),
+    COMPONENT: figma.createComponent()
 
     // Not sceneNodes…
-    PAGE: figma.createPage(),
-    SLICE: figma.createSlice()
+    // PAGE: figma.createPage(),
+    // SLICE: figma.createSlice()
   };
   const k = Object.keys(defaults);
   const v = Object.values(defaults);
   const { objects } = await dump(v);
   // give ts a little kick that it's a tuple
-  const dups = objects.map((v, i): [string, SceneNode] => [k[i], v]);
+  const dups = objects.map((v, i: number): [string, SceneNode] => [k[i], v]);
   return fromEntries(dups);
 }
