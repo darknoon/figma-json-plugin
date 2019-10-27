@@ -36,8 +36,8 @@ function postMessage(message: PluginToUIMessage) {
 async function doInsert(data: DumpedFigma) {
   console.log("plugin inserting: ", data);
   // TODO: this is broken, not clear why...
-  // await insert(data);
-  insert(data);
+  await insert(data);
+  // insert(data);
   console.log("plugin done inserting.");
   postMessage({ type: "didInsert" });
 }

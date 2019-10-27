@@ -141,8 +141,9 @@ export async function insert(n: DumpedFigma): Promise<SceneNode[]> {
 
   const insertSceneNode = (
     json: SceneNode,
-    target: ChildrenMixin
+    target: BaseNode & ChildrenMixin
   ): SceneNode | undefined => {
+    console.log("in insertSceneNode with type", json.type);
     // Using lambdas here to make sure figma is bound as this
     // TODO: experiment whether this is necessary
     const factories = {
@@ -168,10 +169,30 @@ export async function insert(n: DumpedFigma): Promise<SceneNode[]> {
       case "FRAME":
       case "COMPONENT": {
         const { type, children, width, height, ...rest } = json;
+        console.log("children: ", children);
+        console.log("insertSceneNode: ", insertSceneNode);
         const f = factories[json.type]();
+        console.log("created ", f);
         f.resizeWithoutConstraints(width, height);
-        Object.assign(f, rest);
+        console.log("resized ", f);
+        try {
+          Object.assign(f, rest);
+          console.log("assigned ", f);
+        } catch (error) {
+          console.error("assignment failed ", error);
+        }
         children.forEach(c => insertSceneNode(c, f));
+        console.log("applied to children ", f);
+        n = f;
+        break;
+      }
+      case "GROUP": {
+        const { type, children, width, height, ...rest } = json;
+        const nodes = children
+          .map(c => insertSceneNode(c, f))
+          .filter(notUndefined);
+
+        const f = figma.group(nodes, target);
         n = f;
         break;
       }
@@ -213,6 +234,7 @@ export async function insert(n: DumpedFigma): Promise<SceneNode[]> {
       }
     }
     if (n) {
+      console.log("appending child", n);
       target.appendChild(n);
     } else {
       console.log("Unable to do anything with", json);
