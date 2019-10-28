@@ -20,8 +20,16 @@ export interface UpdateDumpMessage {
   data: DumpedFigma;
 }
 
+export interface UpdateInsertTextMessage {
+  type: "updateInsertText";
+  recentInsertText: string;
+}
+
 export interface DidInsertMessage {
   type: "didInsert";
 }
 
-export type PluginToUIMessage = UpdateDumpMessage | DidInsertMessage;
+export type PluginToUIMessage =
+  | UpdateDumpMessage
+  | DidInsertMessage
+  | UpdateInsertTextMessage;
