@@ -1,0 +1,36 @@
+{
+  "objects": [
+    {
+      "locked": false,
+      "visible": true,
+      "pluginData": {
+        "com.layershot.meta": "{\"layerClass\":\"UIWindowLayer\",\"viewClass\":\"UIWindow\"}"
+      },
+      "constraints": {
+        "horizontal": "MIN",
+        "vertical": "MIN"
+      },
+      "opacity": 1,
+      "blendMode": "NORMAL",
+      "isMask": false,
+      "effects": [],
+      "effectStyleId": "",
+      "x": 207,
+      "y": 448,
+      "width": 414,
+      "height": 896,
+      "rotation": 0,
+      "relativeTransform": [[0, 0, 0], [0, 0, 0]],
+      "exportSettings": [],
+      "backgrounds": [],
+      "backgroundStyleId": "",
+      "clipsContent": false,
+      "layoutGrids": [],
+      "guides": [],
+      "gridStyleId": "",
+      "name": "Frame",
+      "type": "FRAME"
+    }
+  ],
+  "images": {}
+}
