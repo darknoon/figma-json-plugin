@@ -1,4 +1,4 @@
-import { DumpedFigma } from "../src/figmaJSON";
+import { FigmaJSON as F } from "ca-to-layershot";
 
 /// Messages UI code sends to Plugin
 
@@ -8,7 +8,7 @@ export interface ReadyMessage {
 
 export interface InsertMessage {
   type: "insert";
-  data: DumpedFigma;
+  data: F.DumpedFigma;
 }
 
 export type UIToPluginMessage = ReadyMessage | InsertMessage;
@@ -17,7 +17,7 @@ export type UIToPluginMessage = ReadyMessage | InsertMessage;
 
 export interface UpdateDumpMessage {
   type: "update";
-  data: DumpedFigma;
+  data: F.DumpedFigma;
 }
 
 export interface UpdateInsertTextMessage {

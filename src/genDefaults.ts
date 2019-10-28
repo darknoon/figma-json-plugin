@@ -1,5 +1,6 @@
 import { dump } from "./index";
 import { fromEntries } from "./polyfill";
+import { FigmaJSON as F } from "ca-to-layershot";
 
 export default async function genDefaults() {
   const defaults = {
@@ -22,6 +23,6 @@ export default async function genDefaults() {
   const v = Object.values(defaults);
   const { objects } = await dump(v);
   // give ts a little kick that it's a tuple
-  const dups = objects.map((v, i: number): [string, SceneNode] => [k[i], v]);
+  const dups = objects.map((v, i: number): [string, F.SceneNode] => [k[i], v]);
   return fromEntries(dups);
 }
