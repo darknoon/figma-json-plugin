@@ -6,12 +6,18 @@ import { UIToPluginMessage, PluginToUIMessage } from "./pluginMessage";
 // Cause our plugin to show
 figma.showUI(__html__);
 
+console.log("This in plugin:", globalThis);
+
+let updateEventsPaused = false;
+
 figma.ui.onmessage = (pluginMessage: any, props: OnMessageProperties) => {
   const message = pluginMessage as UIToPluginMessage;
   switch (message.type) {
     case "insert":
       const { data } = message;
+      updateEventsPaused = true;
       doInsert(data);
+      updateEventsPaused = false;
       break;
     case "ready":
       tellUIAboutStoredText();
@@ -30,43 +36,32 @@ figma.on("close", () => {
 });
 
 async function tellUIAboutStoredText() {
-  // const text = await figma.clientStorage.getAsync("recentInsertText");
-  // if (typeof text === "string") {
-  //   postMessage({ type: "updateInsertText", recentInsertText: text });
-  // }
-  const basic = {
+  const text = await figma.clientStorage.getAsync("recentInsertText");
+  if (typeof text === "string") {
+    postMessage({ type: "updateInsertText", recentInsertText: text });
+    return;
+  }
+  const basic: F.DumpedFigma = {
     objects: [
       {
-        // locked: false,
-        // visible: true,
         pluginData: {
           "com.layershot.meta":
             '{"layerClass":"UIWindowLayer","viewClass":"UIWindow"}'
         },
-        // constraints: {
-        //   horizontal: "MIN",
-        //   vertical: "MIN"
-        // },
-        // opacity: 1,
-        // blendMode: "NORMAL",
-        // isMask: false,
-        // effects: [],
-        // effectStyleId: "",
+        opacity: 1,
         x: 207,
         y: 448,
         width: 414,
         height: 896,
-        rotation: 0,
         children: [],
-        // relativeTransform: [[0, 0, 0], [0, 0, 0]],
-        // exportSettings: [],
-        // backgrounds: [],
-        // backgroundStyleId: "",
-        clipsContent: false,
-        // layoutGrids: [],
-        // guides: [],
-        // gridStyleId: "",
-        name: "Frame",
+        backgrounds: [
+          {
+            type: "SOLID",
+            color: { r: 1, g: 0, b: 0 }
+          }
+        ],
+        clipsContent: true,
+        name: "Test Frame",
         type: "FRAME"
       }
     ],
@@ -90,6 +85,7 @@ function tick(n: number): Promise<void> {
 }
 
 async function doInsert(data: F.DumpedFigma) {
+  figma.clientStorage.setAsync("recentInsertText", JSON.stringify(data));
   await tick(200);
   console.log("plugin inserting: ", data);
   // TODO: this is broken, not clear why...
@@ -100,8 +96,6 @@ async function doInsert(data: F.DumpedFigma) {
   // insert(data);
   console.log("plugin done inserting.");
   postMessage({ type: "didInsert" });
-
-  figma.clientStorage.setAsync("recentInsertText", JSON.stringify(data));
 }
 
 // TODO: expose this in plugin

@@ -134,10 +134,14 @@ async function loadFonts(n: F.DumpedFigma): Promise<void> {
 function safeAssign<T>(n: T, dict: Partial<T>) {
   for (let k in dict) {
     try {
-      const v = dict[k];
       // I can't quite figure out how to get typescript to accept that if k is in dict
       const dictForceTS = dict as Required<T>;
-      n[k] = dictForceTS[k];
+      const v = dictForceTS[k];
+      // Bit of a nasty hack here, but ignore these mixed sentinels
+      if ((v as any) === "__Symbol(figma.mixed)__") {
+        continue;
+      }
+      n[k] = v;
       // console.log(`${k} = ${JSON.stringify(v)}`);
     } catch (error) {
       console.error("assignment failed for key", k, error);
@@ -149,6 +153,9 @@ function applyPluginData(
   n: BaseNodeMixin,
   pluginData: F.SceneNode["pluginData"]
 ) {
+  if (pluginData === undefined) {
+    return;
+  }
   Object.entries(pluginData).map(([k, v]) => n.setPluginData(k, v));
 }
 
@@ -200,7 +207,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
     };
 
     const addToParent = (n: SceneNode | undefined) => {
-      console.log("adding to parent", n);
+      // console.log("adding to parent", n);
       if (n && n.parent !== target) {
         target.appendChild(n);
       }
@@ -211,22 +218,36 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       // Handle types with children
       case "FRAME":
       case "COMPONENT": {
-        const { type, children, width, height, pluginData, ...rest } = json;
+        const {
+          type,
+          children = [],
+          width,
+          height,
+          pluginData,
+          ...rest
+        } = json;
         const f = factories[json.type]();
         addToParent(f);
-        console.log("size target:", { width, height });
+        // console.log("size target:", { width, height });
         f.resize(width, height);
-        console.log("size after:", { width: f.width, height: f.height });
+        // console.log("size after:", { width: f.width, height: f.height });
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
-        console.log("building children: ", children);
+        // console.log("building children: ", children);
         children.forEach(c => insertSceneNode(c, f));
-        console.log("applied to children ", f);
+        // console.log("applied to children ", f);
         n = f;
         break;
       }
       case "GROUP": {
-        const { type, children, width, height, pluginData, ...rest } = json;
+        const {
+          type,
+          children = [],
+          width,
+          height,
+          pluginData,
+          ...rest
+        } = json;
         const nodes = children
           .map(c => insertSceneNode(c, target))
           .filter(notUndefined);
@@ -241,7 +262,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         // TODO: this isn't optimal
         const { type, children, width, height, pluginData, ...rest } = json;
         const f = figma.createBooleanOperation();
-        safeAssign(f, rest);
+        safeAssign(f, rest as Partial<BooleanOperationNode>);
         applyPluginData(f, pluginData);
         f.resizeWithoutConstraints(width, height);
         n = f;
@@ -255,7 +276,9 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       case "VECTOR": {
         const { type, width, height, pluginData, ...rest } = json;
         const f = factories[json.type]();
-        safeAssign(f, rest);
+        safeAssign(f, rest as Partial<
+          RectangleNode & EllipseNode & LineNode & PolygonNode & VectorNode
+        >);
         applyPluginData(f, pluginData);
         f.resizeWithoutConstraints(width, height);
         n = f;
@@ -266,12 +289,13 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         const { type, width, height, fontName, pluginData, ...rest } = json;
         const f = figma.createText();
         // Need to assign this first, because of font-loading rules :O
-        f.fontName = fontName;
-        console.log("assigning in text", rest);
-        safeAssign(f, rest);
+        if (fontName !== "__Symbol(figma.mixed)__") {
+          f.fontName = fontName;
+        }
+        safeAssign(f, rest as Partial<TextNode>);
         applyPluginData(f, pluginData);
         console.log("resizing in text");
-        // f.resize(width, height);
+        f.resize(width, height);
         n = f;
         break;
       }
