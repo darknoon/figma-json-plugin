@@ -1,5 +1,5 @@
 import { dump, insert } from "../src";
-import { FigmaJSON as F } from "ca-to-layershot";
+import * as F from "../src/figma-json";
 import genDefaults from "../src/genDefaults";
 import { UIToPluginMessage, PluginToUIMessage } from "./pluginMessage";
 

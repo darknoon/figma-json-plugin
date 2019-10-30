@@ -1,6 +1,6 @@
 import { dump } from "./index";
 import { fromEntries } from "./polyfill";
-import { FigmaJSON as F } from "ca-to-layershot";
+import * as F from "./figma-json";
 
 export default async function genDefaults() {
   const defaults = {

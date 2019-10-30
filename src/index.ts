@@ -1,6 +1,6 @@
 // Copyright 2019 Andrew Pouliot
 import { fromEntries } from "./polyfill";
-import { FigmaJSON as F } from "ca-to-layershot";
+import * as F from "./figma-json";
 import { fromByteArray, toByteArray } from "base64-js";
 
 // Anything that is readonly on a SceneNode should not be set!
