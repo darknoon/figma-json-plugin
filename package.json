@@ -1,6 +1,6 @@
 {
   "name": "figma-json-plugin",
-  "version": "0.0.4-0",
+  "version": "0.0.4-1",
   "description": "Dump a hierarchy to JSON within a Figma document. Intended for use within Figma plugins.",
   "main": "dist/main.js",
   "browser": "dist/browser.js",
@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "NODE_ENV=development webpack --mode=development --watch",
     "build": "NODE_ENV=production webpack --mode=production",
-    "prepack": "npm run build",
+    "prepack": "npm run clean && npm run build",
     "clean": "rm -rf dist",
     "release:patch": "npm version patch && npm run build && npm publish",
     "release:dev": "npm version prerelease && npm run build && npm publish --tag dev"
