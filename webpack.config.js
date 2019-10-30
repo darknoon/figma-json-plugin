@@ -52,7 +52,7 @@ module.exports = (env, argv) => {
         library: "figmaDump",
         // libraryExport: "figmaDump",
         libraryTarget: "commonjs",
-        filename: "main.js"
+        filename: "index.js"
       }
     }
   ];
