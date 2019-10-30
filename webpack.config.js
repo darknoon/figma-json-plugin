@@ -39,21 +39,6 @@ module.exports = (env, argv) => {
         }),
         new HtmlWebpackInlineSourcePlugin()
       ]
-    },
-    // Output the pure library code (to be used by other figma plugins)
-    {
-      ...baseConfig,
-      optimization: {
-        minimize: false
-      },
-      entry: "./src/index.ts",
-      output: {
-        ...baseConfig.output,
-        library: "figmaDump",
-        // libraryExport: "figmaDump",
-        libraryTarget: "commonjs",
-        filename: "index.js"
-      }
     }
   ];
 };

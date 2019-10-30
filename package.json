@@ -2,20 +2,20 @@
   "name": "figma-json-plugin",
   "version": "0.0.4-2",
   "description": "Dump a hierarchy to JSON within a Figma document. Intended for use within Figma plugins.",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "browser": "dist/browser.js",
   "author": "Andrew Pouliot",
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development webpack --mode=development --watch",
     "build": "NODE_ENV=production webpack --mode=production",
-    "prepack": "npm run clean && npm run build",
+    "build-package": "tsc",
+    "prepack": "npm run clean && npm run build-package",
     "clean": "rm -rf dist",
     "release:patch": "npm version patch && npm run build && npm publish",
     "release:dev": "npm version prerelease && npm run build && npm publish --tag dev"
   },
   "files": [
-    "dist/index.js",
     "dist/src"
   ],
   "repository": {
