@@ -3,6 +3,9 @@ import { fromEntries } from "./polyfill";
 import * as F from "./figma-json";
 import { fromByteArray, toByteArray } from "base64-js";
 
+// Expose types for our consumers to interact with
+export * from "./figma-json";
+
 // Anything that is readonly on a SceneNode should not be set!
 export const readBlacklist = new Set([
   "parent",

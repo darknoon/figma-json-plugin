@@ -1,4 +1,4 @@
-import { FigmaJSON as F } from "ca-to-layershot";
+import * as F from "../src/figma-json";
 
 /// Messages UI code sends to Plugin
 
