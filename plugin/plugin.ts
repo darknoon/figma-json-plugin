@@ -28,7 +28,9 @@ figma.ui.onmessage = (pluginMessage: any, props: OnMessageProperties) => {
 
 figma.on("selectionchange", () => {
   console.log("updating after selection change!");
-  updateUIWithSelection();
+  if (!updateEventsPaused) {
+    updateUIWithSelection();
+  }
 });
 
 figma.on("close", () => {
