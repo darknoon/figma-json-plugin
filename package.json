@@ -1,8 +1,8 @@
 {
   "name": "figma-json-plugin",
-  "version": "0.0.5-alpha.0",
+  "version": "0.0.5-alpha.1",
   "description": "Dump a hierarchy to JSON within a Figma document, or insert a dumped JSON hierarchy. Intended for use within Figma plugins.",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "browser": "dist/browser.js",
   "author": "Andrew Pouliot",
   "license": "MIT",
