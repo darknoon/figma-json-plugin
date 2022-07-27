@@ -1,5 +1,6 @@
+/// <reference types="@figma/plugin-typings" />
+
 import { dump } from "./index";
-import { fromEntries } from "./polyfill";
 import * as F from "./figma-json";
 
 export default async function genDefaults() {
@@ -24,5 +25,5 @@ export default async function genDefaults() {
   const { objects } = await dump(v);
   // give ts a little kick that it's a tuple
   const dups = objects.map((v, i: number): [string, F.SceneNode] => [k[i], v]);
-  return fromEntries(dups);
+  return Object.fromEntries(dups);
 }

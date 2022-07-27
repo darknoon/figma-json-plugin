@@ -2,11 +2,14 @@
   "compilerOptions": {
     "outDir": "dist",
     "declarationDir": "dist",
-    "target": "es6",
-    "lib": ["es2016", "dom"],
+    "target": "ES6",
+    "lib": ["ES2022", "dom"],
     "jsx": "react",
     "strict": true,
+    "esModuleInterop": true,
     "declaration": true,
+    "emitDeclarationOnly": true,
+    "isolatedModules": true,
     "experimentalDecorators": true,
     "typeRoots": ["node_modules/@types"],
     "module": "commonjs",
@@ -14,12 +17,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "exclude": [
-    "dist",
-    "node_modules",
-    ".cache",
-    ".cache-loader",
-    ".next",
-    "chrome-extension"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

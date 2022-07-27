@@ -1,23 +1,34 @@
 // Copyright 2019 Andrew Pouliot
-import { fromEntries } from "./polyfill";
 import * as F from "./figma-json";
 import { fromByteArray, toByteArray } from "base64-js";
+import updateImageHashes from "./updateImageHashes";
 
 // Expose types for our consumers to interact with
-export * from "./figma-json";
+// export * from "./figma-json";
 
 // Anything that is readonly on a SceneNode should not be set!
 export const readBlacklist = new Set([
   "parent",
   "removed",
+  "stuckNodes",
   "__proto__",
   "id",
+  "remote",
+  // These are just redundant
+  // TODO: make a setting whether to dump things like this
+  "hasMissingFont",
   "absoluteTransform",
-  "hasMissingFont"
+  "absoluteRenderBounds",
+  "vectorNetwork"
 ]);
 
 // Things in figmaJSON we are not writing right now
-export const writeBlacklist = new Set(["id"]);
+export const writeBlacklist = new Set([
+  "id",
+  "componentPropertyReferences",
+  "variantProperties",
+  "vectorNetwork"
+]);
 
 function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
@@ -30,27 +41,26 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
   const imageHashes = new Set<string>();
 
   const _dumpObject = (n: AnyObject, keys: readonly string[]) =>
-    keys.reduce(
-      (o, k) => {
-        const v = n[k];
-        if (k === "imageHash" && typeof v === "string") {
-          imageHashes.add(v);
-        }
-        o[k] = _dump(v);
-        return o;
-      },
-      {} as AnyObject
-    );
+    keys.reduce((o, k) => {
+      const v = n[k];
+      if (k === "imageHash" && typeof v === "string") {
+        imageHashes.add(v);
+      }
+      o[k] = _dump(v);
+      return o;
+    }, {} as AnyObject);
 
   const _dump = (n: any): any => {
     switch (typeof n) {
       case "object": {
         if (Array.isArray(n)) {
-          return n.map(v => _dump(v));
+          return n.map((v) => _dump(v));
+        } else if (n === null) {
+          return null;
         } else if (n.__proto__ !== undefined) {
           // Merge keys from __proto__ with natural keys
           const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
-            k => !readBlacklist.has(k)
+            (k) => !readBlacklist.has(k)
           );
           return _dumpObject(n, keys);
         } else {
@@ -75,13 +85,15 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
 
   const dataRequests = [...imageHashes].map(async (hash: string) => {
     const im = figma.getImageByHash(hash);
+    if (im === null) {
+      throw new Error(`Image not found: ${hash}`);
+    }
     const dat = await im.getBytesAsync();
-    const base64 = fromByteArray(dat);
     // Tell typescript it's a tuple not an array (fromEntries type error)
-    return [hash, base64] as [string, F.Base64String];
+    return [hash, dat] as [string, Uint8Array];
   });
 
-  const images = fromEntries(await Promise.all(dataRequests));
+  const images = Object.fromEntries(await Promise.all(dataRequests));
 
   return {
     objects,
@@ -92,6 +104,83 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
 
 async function loadFonts(n: F.DumpedFigma): Promise<void> {
   console.log("starting font load...");
+  const fontNames = fontsToLoad(n);
+  console.log("loading fonts:", fontNames);
+
+  await Promise.all(fontNames.map((f) => figma.loadFontAsync(f)));
+  console.log("done loading fonts.");
+}
+
+// Format is "Family|Style"
+type EncodedFont = string;
+// Assume that font never contains "|"
+export function encodeFont({ family, style }: FontName): EncodedFont {
+  if (family.includes("|") || style.includes("|")) {
+    throw new Error(`Cannot encode a font with "|" in the name.`);
+  }
+  return [family, style].join("|");
+}
+
+export function decodeFont(f: EncodedFont): FontName {
+  const s = f.split("|");
+  if (s.length !== 2) {
+    throw new Error(`Unable to decode font string: ${f}`);
+  }
+  const [family, style] = s;
+  return { family, style };
+}
+
+export function preflightFonts(
+  dump: F.DumpedFigma,
+  availableFonts: FontName[]
+): {
+  requiredFonts: FontName[];
+  missingFonts: FontName[];
+  usedFonts: FontName[];
+} {
+  const requiredFonts = fontsToLoad(dump);
+  const availableFontsSet = new Set(availableFonts.map(encodeFont));
+  const missingFonts = requiredFonts.filter(
+    (f) => !availableFontsSet.has(encodeFont(f))
+  );
+  const usedFonts = requiredFonts.filter((f) =>
+    availableFontsSet.has(encodeFont(f))
+  );
+  return {
+    requiredFonts,
+    missingFonts,
+    usedFonts
+  };
+}
+
+function resizeOrLog(
+  f: LayoutMixin,
+  width: number,
+  height: number,
+  withoutConstraints?: boolean
+) {
+  if (width > 0.01 && height > 0.01) {
+    if (withoutConstraints) {
+      f.resizeWithoutConstraints(width, height);
+    } else {
+      f.resize(width, height);
+    }
+    // We could check that the size matches after:
+    // console.log("size after:", { width: f.width, height: f.height });
+  } else {
+    const generic = f as SceneNode;
+    const { type } = generic;
+    console.log(
+      `Couldn't resize item: ${JSON.stringify({
+        type,
+        width,
+        height
+      })}`
+    );
+  }
+}
+
+export function fontsToLoad(n: F.DumpedFigma): FontName[] {
   // Sets are dumb in JS, can't use FontName because it's an object ref
   // Normalize all fonts to their JSON representation
   const fonts = new Set<string>();
@@ -108,43 +197,47 @@ async function loadFonts(n: F.DumpedFigma): Promise<void> {
       case "TEXT":
         const { fontName } = json;
         if (typeof fontName === "object") {
-          fonts.add(JSON.stringify(fontName));
-        } else {
-          console.log("encountered fontName symbol: ", fontName);
+          fonts.add(encodeFont(fontName));
+        } else if (fontName === "__Symbol(figma.mixed)__") {
+          console.log("encountered mixed fontName: ", fontName);
         }
     }
   };
 
-  console.log("searching objects...");
-
   try {
     n.objects.forEach(addFonts);
   } catch (err) {
-    console.log("error searching for fonts:");
+    console.error("error searching for fonts:", err);
   }
 
-  // There seems to be a bug when we don't await any fonts…b
-  const addl = { family: "SF Pro Text", style: "Regular" };
-  const fontNames = [...fonts, JSON.stringify(addl)].map(
-    fstr => JSON.parse(fstr) as FontName
-  );
-  console.log("loading fonts:", fontNames);
+  const fontNames = [...fonts].map((fstr) => decodeFont(fstr));
 
-  await Promise.all(fontNames.map(f => figma.loadFontAsync(f)));
-  console.log("done loading fonts.");
+  return fontNames;
 }
 
-function safeAssign<T>(n: T, dict: Partial<T>) {
+// Any value that is (A | B | PluginAPI["mixed"]) becomes  (A | B | F.Mixed)
+type SymbolMixedToMixed<T> = T extends PluginAPI["mixed"]
+  ? Exclude<T, PluginAPI["mixed"]> | F.Mixed
+  : T;
+
+// Apply said transformation to a Partial<T>
+type PartialTransformingMixedValues<T> = {
+  [P in keyof T]?: SymbolMixedToMixed<T[P]>;
+};
+
+function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
   for (let k in dict) {
     try {
-      // I can't quite figure out how to get typescript to accept that if k is in dict
-      const dictForceTS = dict as Required<T>;
-      const v = dictForceTS[k];
-      // Bit of a nasty hack here, but ignore these mixed sentinels
-      if ((v as any) === "__Symbol(figma.mixed)__") {
+      if (writeBlacklist.has(k)) {
         continue;
       }
-      n[k] = v;
+      const v = dict[k];
+      // Bit of a nasty hack here, but don't try to set these mixed sentinels
+      if (v === F.MixedValue || v === undefined) {
+        continue;
+      }
+      // Have to cast here, typescript doesn't know how to match these up
+      n[k] = v as T[typeof k];
       // console.log(`${k} = ${JSON.stringify(v)}`);
     } catch (error) {
       console.error("assignment failed for key", k, error);
@@ -170,26 +263,27 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
 
   // Create all images
   console.log("creating images.");
-  const imt = Object.entries(n.images);
-  const figim = imt.map(([hash, base64]) => {
-    let im: Image = figma.getImageByHash(hash);
-    if (!im) {
-      console.log("creating image: ", im);
-      const buffer = toByteArray(base64);
-      im = figma.createImage(buffer);
-    } else {
-      console.log("have image: ", im);
-    }
+  const jsonImages = Object.entries(n.images);
+  // TODO(perf): deduplicate same hash => base64 decode => figma
+  const hashUpdates = new Map<string, string>();
+  const figim = jsonImages.map(([hash, bytes]) => {
+    console.log("Adding with hash: ", hash);
+    // We can't look up the image by our hash, since figma has a different one
+    // const buffer = toByteArray(bytes);
+    const im = figma.createImage(bytes);
     // Tell typescript this is a tuple not an array
+    hashUpdates.set(hash, im.hash);
     return [hash, im] as [string, Image];
   });
-  const loadedImages = fromEntries(figim);
 
+  console.log("updating figma based on new hashes.");
+  const objects = n.objects.map((n) => updateImageHashes(n, hashUpdates));
+
+  console.log("inserting.");
   const insertSceneNode = (
     json: F.SceneNode,
     target: BaseNode & ChildrenMixin
   ): SceneNode | undefined => {
-    console.log("in insertSceneNode with type", json.type);
     // Using lambdas here to make sure figma is bound as this
     // TODO: experiment whether this is necessary
     const factories = {
@@ -226,18 +320,18 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           children = [],
           width,
           height,
+          strokeCap,
+          strokeJoin,
           pluginData,
           ...rest
         } = json;
         const f = factories[json.type]();
         addToParent(f);
-        // console.log("size target:", { width, height });
-        f.resize(width, height);
-        // console.log("size after:", { width: f.width, height: f.height });
+        resizeOrLog(f, width, height);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
         // console.log("building children: ", children);
-        children.forEach(c => insertSceneNode(c, f));
+        children.forEach((c) => insertSceneNode(c, f));
         // console.log("applied to children ", f);
         n = f;
         break;
@@ -252,10 +346,9 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           ...rest
         } = json;
         const nodes = children
-          .map(c => insertSceneNode(c, target))
+          .map((c) => insertSceneNode(c, target))
           .filter(notUndefined);
 
-        console.log("created objects", nodes);
         const f = figma.group(nodes, target);
         safeAssign(f, rest);
         n = f;
@@ -265,9 +358,9 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         // TODO: this isn't optimal
         const { type, children, width, height, pluginData, ...rest } = json;
         const f = figma.createBooleanOperation();
-        safeAssign(f, rest as Partial<BooleanOperationNode>);
+        safeAssign(f, rest);
         applyPluginData(f, pluginData);
-        f.resizeWithoutConstraints(width, height);
+        resizeOrLog(f, width, height);
         n = f;
         break;
       }
@@ -279,11 +372,14 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       case "VECTOR": {
         const { type, width, height, pluginData, ...rest } = json;
         const f = factories[json.type]();
-        safeAssign(f, rest as Partial<
-          RectangleNode & EllipseNode & LineNode & PolygonNode & VectorNode
-        >);
+        safeAssign(
+          f,
+          rest as Partial<
+            RectangleNode & EllipseNode & LineNode & PolygonNode & VectorNode
+          >
+        );
         applyPluginData(f, pluginData);
-        f.resizeWithoutConstraints(width, height);
+        resizeOrLog(f, width, height, true);
         n = f;
         break;
       }
@@ -295,10 +391,9 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         if (fontName !== "__Symbol(figma.mixed)__") {
           f.fontName = fontName;
         }
-        safeAssign(f, rest as Partial<TextNode>);
+        safeAssign(f, rest);
         applyPluginData(f, pluginData);
-        console.log("resizing in text");
-        f.resize(width, height);
+        resizeOrLog(f, width, height);
         n = f;
         break;
       }
@@ -309,18 +404,15 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       }
     }
     if (n) {
-      console.log("appending child", n);
       target.appendChild(n);
     } else {
-      console.log("Unable to do anything with", json);
+      console.warn("Unable to do anything with", json);
     }
     return n;
   };
 
-  console.log("n.objects", n.objects);
-
-  return n.objects
-    .map(o => {
+  return objects
+    .map((o) => {
       const n = insertSceneNode(o, figma.currentPage);
       if (n !== undefined) {
         n.x += offset.x;

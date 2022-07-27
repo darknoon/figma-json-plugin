@@ -2,4 +2,6 @@ plugin/**/*.js
 node_modules
 dist
 
+yarn-error.log
+
 .DS_Store
