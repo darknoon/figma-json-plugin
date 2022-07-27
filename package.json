@@ -15,6 +15,7 @@
     "build:plugin": "esbuild plugin/plugin.ts --bundle --outfile=dist/plugin.js",
     "build:ui": "esbuild plugin/ui.tsx --bundle --outfile=dist/ui.js",
     "build:types": "tsc",
+    "publish-prerelease": "yarn build && yarn publish --prerelease",
     "test": "jest",
     "test:watch": "jest --watch",
     "format": "prettier --write .",
