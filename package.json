@@ -20,7 +20,7 @@
     "clean": "rm -rf dist"
   },
   "files": [
-    "dist/src"
+    "dist/"
   ],
   "devDependencies": {
     "@figma/plugin-typings": "^1.49.0",

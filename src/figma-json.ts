@@ -13,9 +13,7 @@ export type Base64String = string;
 
 export interface DumpedFigma {
   objects: SceneNode[];
-  // followed by resources
   images: { [hash: string]: Uint8Array };
-  //   screenshots?: { hash: string }[]
 }
 
 ////////////////////////////////////////////////////////////////////////////////
