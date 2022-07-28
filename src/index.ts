@@ -1,5 +1,6 @@
 // Copyright 2019 Andrew Pouliot
 import * as F from "./figma-json";
+import "@figma/plugin-typings";
 import updateImageHashes from "./updateImageHashes";
 
 // Expose types for our consumers to interact with
