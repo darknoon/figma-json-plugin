@@ -41,7 +41,7 @@ class InsertUI extends React.Component<{
         <textarea
           style={{ width: "100%", height: "100%" }}
           defaultValue={recentInsertText}
-          ref={t => (this.textArea = t)}
+          ref={(t) => (this.textArea = t)}
         ></textarea>
       </>
     );
@@ -116,7 +116,7 @@ class UI extends React.Component {
     } else if (showInsert) {
       return (
         <InsertUI
-          recentInsertText={recentInsertText || JSON.stringify(dump)}
+          recentInsertText={recentInsertText || JSON.stringify(dump, null, 2)}
           doInsert={this.doInsert}
         />
       );
@@ -128,7 +128,7 @@ class UI extends React.Component {
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
           </Toolbar>
-          <p>{JSON.stringify(dump)}</p>
+          <pre>{JSON.stringify(dump, null, 2)}</pre>
           {/* <ReactJson src={dump} name={null} /> */}
         </>
       );

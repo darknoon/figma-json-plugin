@@ -9,7 +9,10 @@
     "isMask": false,
     "effects": [],
     "effectStyleId": "",
-    "relativeTransform": [[1, 0, -468], [0, 1, -351]],
+    "relativeTransform": [
+      [1, 0, -468],
+      [0, 1, -351]
+    ],
     "x": -468,
     "y": -351,
     "width": 300,
@@ -33,7 +36,10 @@
             "opacity": 1,
             "blendMode": "NORMAL",
             "scaleMode": "FILL",
-            "imageTransform": [[1, 0, 0], [0, 1, 0]],
+            "imageTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
             "scalingFactor": 0.5,
             "filters": {
               "exposure": 0,
@@ -55,7 +61,10 @@
         "strokeCap": "NONE",
         "strokeJoin": "MITER",
         "dashPattern": [],
-        "relativeTransform": [[1, 0, 0], [0, 1, 109]],
+        "relativeTransform": [
+          [1, 0, 0],
+          [0, 1, 109]
+        ],
         "x": 0,
         "y": 109,
         "width": 300,
@@ -123,7 +132,10 @@
         "strokeCap": "NONE",
         "strokeJoin": "MITER",
         "dashPattern": [],
-        "relativeTransform": [[1, 0, 10], [0, 1, 10]],
+        "relativeTransform": [
+          [1, 0, 10],
+          [0, 1, 10]
+        ],
         "x": 10,
         "y": 10,
         "width": 32,
@@ -166,7 +178,10 @@
         "strokeCap": "NONE",
         "strokeJoin": "MITER",
         "dashPattern": [],
-        "relativeTransform": [[1, 0, 50], [0, 1, 45]],
+        "relativeTransform": [
+          [1, 0, 50],
+          [0, 1, 45]
+        ],
         "x": 50,
         "y": 45,
         "width": 241,
@@ -216,7 +231,10 @@
         "strokeCap": "NONE",
         "strokeJoin": "MITER",
         "dashPattern": [],
-        "relativeTransform": [[1, 0, 50], [0, 1, 12]],
+        "relativeTransform": [
+          [1, 0, 50],
+          [0, 1, 12]
+        ],
         "x": 50,
         "y": 12,
         "width": 200,

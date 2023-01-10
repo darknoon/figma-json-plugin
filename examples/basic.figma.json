@@ -20,7 +20,10 @@
       "width": 414,
       "height": 896,
       "rotation": 0,
-      "relativeTransform": [[0, 0, 0], [0, 0, 0]],
+      "relativeTransform": [
+        [0, 0, 0],
+        [0, 0, 0]
+      ],
       "exportSettings": [],
       "backgrounds": [],
       "backgroundStyleId": "",

@@ -1,7 +1,8 @@
 {
-  "name": "figma-json",
+  "name": "JSON Plugin",
   "id": "763482362622863901",
   "api": "1.0.0",
   "main": "dist/plugin.js",
-  "ui": "dist/ui.html"
+  "editorType": ["figma"],
+  "ui": "dist/ui.js"
 }
