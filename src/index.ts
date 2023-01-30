@@ -20,7 +20,10 @@ export const readBlacklist = new Set([
   "absoluteRenderBounds",
   "vectorNetwork",
   // mainComponent property that causes an infinite loop
-  "instances"
+  "instances",
+  // Not needed property that erros when called on anything other
+  // than a component set or non-variant component"
+  "componentPropertyDefinitions"
 ]);
 
 // Things in figmaJSON we are not writing right now
@@ -28,7 +31,20 @@ export const writeBlacklist = new Set([
   "id",
   "componentPropertyReferences",
   "variantProperties",
-  "vectorNetwork"
+  "vectorNetwork",
+  // TODO: Should these readonly props be part of readBlackList instead?
+  "absoluteBoundingBox",
+  "overlayPositionType",
+  "overlayBackground",
+  "overlayBackgroundInteraction",
+  "attachedConnectors",
+  // Causes error. Hypothesis: these are readonly
+  // even though Figma docs don't specify and we should
+  // use the `vectorPaths` prop instead
+  "fillGeometry",
+  "strokeGeometry",
+  // Undocumented prop
+  "canUpgradeToNativeBidiSupport"
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
@@ -241,6 +257,12 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
       if (v === F.MixedValue || v === undefined) {
         continue;
       }
+
+      console.log("node", n);
+      console.log("key", k);
+      console.log("value", v);
+      console.log("\n");
+
       // Have to cast here, typescript doesn't know how to match these up
       n[k] = v as T[typeof k];
       // console.log(`${k} = ${JSON.stringify(v)}`);
@@ -301,6 +323,8 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       TEXT: () => figma.createText(),
       FRAME: () => figma.createFrame(),
       // Is this a component instance or original component???
+      // Vincent: This is an original component
+      // Vincent: We should test this behavior...
       COMPONENT: () => figma.createComponent()
 
       // Not sceneNodes…
@@ -317,6 +341,41 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
 
     let n;
     switch (json.type) {
+      case "INSTANCE": {
+        const {
+          width,
+          children = [],
+          height,
+          strokeCap,
+          strokeJoin,
+          pluginData,
+          mainComponent,
+          ...rest
+        } = json;
+
+        const key = mainComponent?.key;
+        if (!key) {
+          // TODO: How to handle this?
+          break;
+        }
+
+        // TODO: Should I make parent function async or not?
+        // TODO: How to handle unpublished components?
+        // TODO: Use factory?
+        // TODO: Merge this code with frame/component code?
+        // TODO: Handle assignment errors
+        figma.importComponentByKeyAsync(key).then((c) => {
+          const f = c.createInstance();
+
+          addToParent(f);
+          resizeOrLog(f, width, height);
+          safeAssign(f, rest);
+          applyPluginData(f, pluginData);
+          // TODO: Handle children?
+          n = f;
+        });
+        break;
+      }
       // Handle types with children
       case "FRAME":
       case "COMPONENT": {
@@ -369,7 +428,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         n = f;
         break;
       }
-
       case "RECTANGLE":
       case "ELLIPSE":
       case "LINE":
