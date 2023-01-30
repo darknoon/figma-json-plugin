@@ -192,6 +192,7 @@ async function updateUIWithSelection() {
   try {
     // Dump document selection to JSON
     const data = await dump(figma.currentPage.selection);
+
     postMessage({ type: "update", data });
   } catch (e) {
     console.error("error during plugin: ", e);

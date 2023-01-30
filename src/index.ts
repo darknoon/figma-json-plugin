@@ -18,7 +18,9 @@ export const readBlacklist = new Set([
   "hasMissingFont",
   "absoluteTransform",
   "absoluteRenderBounds",
-  "vectorNetwork"
+  "vectorNetwork",
+  // mainComponent property that causes an infinite loop
+  "instances"
 ]);
 
 // Things in figmaJSON we are not writing right now
@@ -49,14 +51,17 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
       return o;
     }, {} as AnyObject);
 
+  // TODO: Can we strengthen this return type?
   const _dump = (n: any): any => {
     switch (typeof n) {
       case "object": {
+        // Array is typeof object in JavaScript
         if (Array.isArray(n)) {
           return n.map((v) => _dump(v));
         } else if (n === null) {
           return null;
         } else if (n.__proto__ !== undefined) {
+          // TODO: What's n.__proto__?
           // Merge keys from __proto__ with natural keys
           const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
             (k) => !readBlacklist.has(k)
@@ -75,6 +80,7 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
         } else {
           return String(n);
         }
+      // TODO: When does this case trigger?
       default:
         return n;
     }
