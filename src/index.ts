@@ -258,10 +258,10 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
         continue;
       }
 
-      console.log("node", n);
-      console.log("key", k);
-      console.log("value", v);
-      console.log("\n");
+      // console.log("node", n);
+      // console.log("key", k);
+      // console.log("value", v);
+      // console.log("\n");
 
       // Have to cast here, typescript doesn't know how to match these up
       n[k] = v as T[typeof k];
