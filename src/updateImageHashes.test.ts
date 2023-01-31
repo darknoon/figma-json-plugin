@@ -76,7 +76,10 @@ const frameDefaults: F.FrameNode = {
     type: "NONE"
   },
   overlayBackgroundInteraction: "NONE",
-  reactions: []
+  reactions: [],
+  itemReverseZIndex: false,
+  componentPropertyReferences: null,
+  strokesIncludedInLayout: false
 };
 test("Updates background", () => {
   const updates = new Map([["A", "B"]]);

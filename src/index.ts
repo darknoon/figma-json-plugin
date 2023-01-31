@@ -14,9 +14,6 @@ export const readBlacklist = new Set([
   "id",
   "remote",
   "attachedConnectors",
-  "overlayPositionType",
-  "overlayBackground",
-  "overlayBackgroundInteraction",
   "instances",
   "componentPropertyDefinitions",
   "masterComponent", // deprecated
@@ -32,13 +29,18 @@ export const readBlacklist = new Set([
 // Things in figmaJSON we are not writing right now
 export const writeBlacklist = new Set([
   "id",
-  "componentPropertyReferences",
+  "componentPropertyReferences", // TODO?
   "variantProperties",
   "componentProperties",
   "fillGeometry", // seems to be readonly? use vectorPaths?
   "strokeGeometry", // seems to be readonly? use vectorPaths?
   "canUpgradeToNativeBidiSupport", // undocumented prop
-  "overrides"
+  "overrides",
+  "overlayPositionType",
+  "overlayBackground",
+  "overlayBackgroundInteraction",
+  "itemReverseZIndex",
+  "strokesIncludedInLayout"
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
@@ -332,16 +334,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         target.appendChild(n);
       }
     };
-
-    // // change json order such that layoutMode key is always first
-    // if ("layoutMode" in json) {
-    //   const { layoutMode, ...rest } = json;
-    //   json = { layoutMode, ...rest };
-    // }
-
-    // So issue with itemReverseZIndex is that we can't even set it to
-    // false whenever layoutMode === "NONE." But layers without layout mode
-    // do have a false value x)
 
     let n;
     switch (json.type) {

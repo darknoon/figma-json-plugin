@@ -711,9 +711,9 @@ export interface FramePrototypingMixin {
   overflowDirection: OverflowDirection;
   numberOfFixedChildren: number;
 
-  // readonly overlayPositionType: OverlayPositionType;
-  // readonly overlayBackground: OverlayBackground;
-  // readonly overlayBackgroundInteraction: OverlayBackgroundInteraction;
+  readonly overlayPositionType: OverlayPositionType;
+  readonly overlayBackground: OverlayBackground;
+  readonly overlayBackgroundInteraction: OverlayBackgroundInteraction;
 }
 
 export interface VectorLikeMixin {
