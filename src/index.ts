@@ -343,6 +343,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
     switch (json.type) {
       case "INSTANCE": {
         const {
+          type,
           width,
           children = [],
           height,
@@ -350,6 +351,9 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokeJoin,
           pluginData,
           mainComponent,
+          // Take these out because we can't set them in an instance.
+          overflowDirection,
+
           ...rest
         } = json;
 
