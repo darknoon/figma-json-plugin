@@ -13,19 +13,20 @@ export const readBlacklist = new Set([
   "__proto__",
   "id",
   "remote",
+  "attachedConnectors",
+  "overlayPositionType",
+  "overlayBackground",
+  "overlayBackgroundInteraction",
+  "instances",
+  "componentPropertyDefinitions",
+  "masterComponent", // deprecated
   // These are just redundant
   // TODO: make a setting whether to dump things like this
   "hasMissingFont",
   "absoluteTransform",
   "absoluteRenderBounds",
-  "vectorNetwork",
-  // mainComponent property that causes an infinite loop
-  "instances",
-  // Not needed property that erros when called on anything other
-  // than a component set or non-variant component"
-  "componentPropertyDefinitions",
-  // masterComponent is deprecated
-  "masterComponent"
+  "absoluteBoundingBox",
+  "vectorNetwork"
 ]);
 
 // Things in figmaJSON we are not writing right now
@@ -33,21 +34,10 @@ export const writeBlacklist = new Set([
   "id",
   "componentPropertyReferences",
   "variantProperties",
-  "vectorNetwork",
-  // TODO: Should these readonly props be part of readBlackList instead?
-  "absoluteBoundingBox",
-  "overlayPositionType",
-  "overlayBackground",
-  "overlayBackgroundInteraction",
-  "attachedConnectors",
-  // Causes error. Hypothesis: these are readonly
-  // even though Figma docs don't specify and we should
-  // use the `vectorPaths` prop instead
-  "fillGeometry",
-  "strokeGeometry",
-  // Undocumented prop
-  "canUpgradeToNativeBidiSupport",
-  // readonly. TODO: Investigate whether we're handling overrides.
+  "componentProperties",
+  "fillGeometry", // seems to be readonly? use vectorPaths?
+  "strokeGeometry", // seems to be readonly? use vectorPaths?
+  "canUpgradeToNativeBidiSupport", // undocumented prop
   "overrides"
 ]);
 

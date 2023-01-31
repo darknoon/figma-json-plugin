@@ -609,8 +609,13 @@ export interface PluginDataMixin {
 export interface SceneNodeMixin {
   visible: boolean;
   locked: boolean;
-  readonly stuckNodes: SceneNode[];
-  readonly attachedConnectors: ConnectorNode[];
+  // readonly stuckNodes: SceneNode[];
+  // readonly attachedConnectors: ConnectorNode[];
+  componentPropertyReferences:
+    | {
+        [nodeProperty in "visible" | "characters" | "mainComponent"]: string;
+      }
+    | null;
 }
 
 export interface StickableMixin {
@@ -626,7 +631,7 @@ export interface ConstraintMixin {
 }
 
 export interface LayoutMixin {
-  readonly absoluteTransform: Transform;
+  // readonly absoluteTransform: Transform;
   relativeTransform: Transform;
   x: number;
   y: number;
@@ -634,8 +639,8 @@ export interface LayoutMixin {
 
   readonly width: number;
   readonly height: number;
-  readonly absoluteRenderBounds: Rect | null;
-  readonly absoluteBoundingBox: Rect | null;
+  // readonly absoluteRenderBounds: Rect | null;
+  // readonly absoluteBoundingBox: Rect | null;
   constrainProportions: boolean;
 
   layoutAlign: "MIN" | "CENTER" | "MAX" | "STRETCH" | "INHERIT"; // applicable only inside auto-layout frames
@@ -706,9 +711,9 @@ export interface FramePrototypingMixin {
   overflowDirection: OverflowDirection;
   numberOfFixedChildren: number;
 
-  readonly overlayPositionType: OverlayPositionType;
-  readonly overlayBackground: OverlayBackground;
-  readonly overlayBackgroundInteraction: OverlayBackgroundInteraction;
+  // readonly overlayPositionType: OverlayPositionType;
+  // readonly overlayBackground: OverlayBackground;
+  // readonly overlayBackgroundInteraction: OverlayBackgroundInteraction;
 }
 
 export interface VectorLikeMixin {
@@ -788,13 +793,13 @@ export interface OpaqueNodeMixin
   extends BaseNodeMixin,
     SceneNodeMixin,
     ExportMixin {
-  readonly absoluteTransform: Transform;
+  // readonly absoluteTransform: Transform;
   relativeTransform: Transform;
   x: number;
   y: number;
   readonly width: number;
   readonly height: number;
-  readonly absoluteBoundingBox: Rect | null;
+  // readonly absoluteBoundingBox: Rect | null;
 }
 
 export interface MinimalBlendMixin {
@@ -806,14 +811,12 @@ export interface VariantMixin {
   readonly variantProperties: { [property: string]: string } | null;
 }
 
-// TODO: Was there a reason our original
-// definitions didn't include this?
 interface ComponentPropertiesMixin {
-  readonly componentPropertyDefinitions: ComponentPropertyDefinitions;
+  // readonly componentPropertyDefinitions: ComponentPropertyDefinitions;
 }
 
 export interface TextSublayerNode {
-  readonly hasMissingFont: boolean;
+  // readonly hasMissingFont: boolean;
 
   paragraphIndent: number;
   paragraphSpacing: number;
@@ -987,7 +990,7 @@ export interface ComponentNode
     VariantMixin,
     ComponentPropertiesMixin {
   readonly type: "COMPONENT";
-  readonly instances: InstanceNode[];
+  // readonly instances: InstanceNode[];
 }
 
 export interface ComponentProperties {
@@ -1003,7 +1006,7 @@ export interface InstanceNode extends DefaultFrameMixin, VariantMixin {
   mainComponent: ComponentNode | null;
   readonly componentProperties: ComponentProperties;
   scaleFactor: number;
-  readonly exposedInstances: InstanceNode[];
+  // readonly exposedInstances: InstanceNode[];
   isExposedInstance: boolean;
   readonly overrides: {
     id: string;
