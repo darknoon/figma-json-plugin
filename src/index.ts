@@ -6,6 +6,7 @@ import updateImageHashes from "./updateImageHashes";
 export * from "./figma-json";
 
 // Anything that is readonly on a SceneNode should not be set!
+// Cross check this with what's commented out in type file
 export const readBlacklist = new Set([
   "parent",
   "removed",
@@ -23,7 +24,8 @@ export const readBlacklist = new Set([
   "absoluteTransform",
   "absoluteRenderBounds",
   "absoluteBoundingBox",
-  "vectorNetwork"
+  "vectorNetwork",
+  "exposedInstances"
 ]);
 
 // Things in figmaJSON we are not writing right now
@@ -40,7 +42,9 @@ export const writeBlacklist = new Set([
   "overlayBackground",
   "overlayBackgroundInteraction",
   "itemReverseZIndex",
-  "strokesIncludedInLayout"
+  "strokesIncludedInLayout",
+  "isExposedInstance", // TODO: should we even save this?
+  "fontWeight"
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
@@ -335,6 +339,96 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       }
     };
 
+    const convertStyleIdToKey = (styleId: string) => {
+      if (styleId === "") {
+        return "";
+      }
+
+      // TODO: add errors?
+      return styleId.split("S:")[1].split(",")[0];
+    };
+
+    const applyFillStyle = (
+      n: MinimalFillsMixin,
+      styleId: string | F.Mixed
+    ) => {
+      if (styleId === F.MixedValue) {
+        return;
+      }
+
+      const styleKey = convertStyleIdToKey(styleId);
+      if (!styleKey) {
+        return;
+      }
+
+      figma.importStyleByKeyAsync(styleKey).then((s) => {
+        n.fillStyleId = s.id;
+      });
+    };
+
+    const applyStrokeStyle = (
+      n: MinimalStrokesMixin,
+      styleId: string | F.Mixed
+    ) => {
+      if (styleId === F.MixedValue) {
+        return;
+      }
+
+      const styleKey = convertStyleIdToKey(styleId);
+      if (!styleKey) {
+        return;
+      }
+
+      figma.importStyleByKeyAsync(styleKey).then((s) => {
+        n.strokeStyleId = s.id;
+      });
+    };
+
+    const applyTextStyle = (n: TextNode, styleId: string | F.Mixed) => {
+      if (styleId === F.MixedValue) {
+        return;
+      }
+
+      const styleKey = convertStyleIdToKey(styleId);
+      if (!styleKey) {
+        return;
+      }
+
+      figma.importStyleByKeyAsync(styleKey).then((s) => {
+        n.textStyleId = s.id;
+      });
+    };
+
+    const applyEffectStyle = (n: BlendMixin, styleId: string | F.Mixed) => {
+      if (styleId === F.MixedValue) {
+        return;
+      }
+
+      const styleKey = convertStyleIdToKey(styleId);
+      if (!styleKey) {
+        return;
+      }
+
+      figma.importStyleByKeyAsync(styleKey).then((s) => {
+        n.effectStyleId = s.id;
+      });
+    };
+
+    const applyGridStyle = (n: BaseFrameMixin, styleId: string | F.Mixed) => {
+      if (styleId === F.MixedValue) {
+        return;
+      }
+
+      const styleKey = convertStyleIdToKey(styleId);
+      if (!styleKey) {
+        return;
+      }
+
+      figma.importStyleByKeyAsync(styleKey).then((s) => {
+        n.gridStyleId = s.id;
+      });
+    };
+
     let n;
     switch (json.type) {
       case "INSTANCE": {
@@ -349,7 +443,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           mainComponent,
           // Take these out because we can't set them in an instance.
           overflowDirection,
-
           ...rest
         } = json;
 
@@ -387,6 +480,10 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokeCap,
           strokeJoin,
           pluginData,
+          fillStyleId,
+          strokeStyleId,
+          effectStyleId,
+          gridStyleId,
           ...rest
         } = json;
         const f = factories[json.type]();
@@ -395,6 +492,10 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
         // console.log("building children: ", children);
+        applyFillStyle(f, fillStyleId);
+        applyStrokeStyle(f, strokeStyleId);
+        applyEffectStyle(f, effectStyleId);
+        applyGridStyle(f, gridStyleId);
         children.forEach((c) => insertSceneNode(c, f));
         // console.log("applied to children ", f);
         n = f;

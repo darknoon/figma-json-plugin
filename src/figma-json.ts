@@ -1007,7 +1007,7 @@ export interface InstanceNode extends DefaultFrameMixin, VariantMixin {
   readonly componentProperties: ComponentProperties;
   scaleFactor: number;
   // readonly exposedInstances: InstanceNode[];
-  isExposedInstance: boolean;
+  // isExposedInstance: boolean; TODO: look into this
   readonly overrides: {
     id: string;
     // TODO: Does this refer to non-existing type?
