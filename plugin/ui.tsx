@@ -4,6 +4,8 @@ import ReactJson from "react-json-view";
 import Toolbar, { InsertButton } from "./toolbar";
 import { PluginToUIMessage } from "./pluginMessage";
 
+import test from "../vincent-layers-test.json";
+
 interface UIState {
   dump?: any;
   showInsert: boolean;
@@ -143,6 +145,14 @@ class UI extends React.Component {
         >
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
+            <button
+              onClick={() => {
+                this.doInsert(JSON.stringify(test));
+              }}
+              style={{ userSelect: "none" }}
+            >
+              Test
+            </button>
           </Toolbar>
           <pre style={{ flex: 1, overflowY: "auto" }}>
             {JSON.stringify(dump, null, 2)}
