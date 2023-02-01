@@ -62,11 +62,6 @@ const defaultTransform: F.Transform = [
 ];
 
 async function tellUIAboutStoredText() {
-  // const text = await figma.clientStorage.getAsync("recentInsertText");
-  // if (typeof text === "string") {
-  //   postMessage({ type: "updateInsertText", recentInsertText: text });
-  //   return;
-  // }
   const l: F.FrameNode = {
     pluginData: {
       "com.layershot.meta":
@@ -206,7 +201,6 @@ function tick(n: number): Promise<void> {
 }
 
 async function doInsert(data: F.DumpedFigma) {
-  // figma.clientStorage.setAsync("recentInsertText", JSON.stringify(data));
   await tick(200);
   console.log("plugin inserting: ", data);
   // TODO: this is broken, not clear why...
