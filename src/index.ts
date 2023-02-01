@@ -21,8 +21,10 @@ export const readBlacklist = new Set([
   "absoluteRenderBounds",
   "absoluteBoundingBox",
   "vectorNetwork",
-  // Figma shows this but plugin API doesn't support it yet
-  "playbackSettings"
+  // Figma exposes this but plugin types don't support it yet
+  "playbackSettings",
+  // Deprecated but Figma still exposes it
+  "horizontalPadding"
 ]);
 
 // Things in figmaJSON we are not writing right now
