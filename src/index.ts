@@ -67,11 +67,9 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
       return o;
     }, {} as AnyObject);
 
-  // TODO: Can we strengthen this return type?
   const _dump = (n: any): any => {
     switch (typeof n) {
       case "object": {
-        // Array is typeof object in JavaScript
         if (Array.isArray(n)) {
           return n.map((v) => _dump(v));
         } else if (n === null) {
@@ -95,7 +93,6 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
         } else {
           return String(n);
         }
-      // TODO: When does this case trigger?
       default:
         return n;
     }
@@ -256,7 +253,6 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
       if (v === F.MixedValue || v === undefined) {
         continue;
       }
-
       // Have to cast here, typescript doesn't know how to match these up
       n[k] = v as T[typeof k];
       // console.log(`${k} = ${JSON.stringify(v)}`);
