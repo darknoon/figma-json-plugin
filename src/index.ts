@@ -77,7 +77,6 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
         } else if (n === null) {
           return null;
         } else if (n.__proto__ !== undefined) {
-          // TODO: What's n.__proto__?
           // Merge keys from __proto__ with natural keys
           const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
             (k) => !readBlacklist.has(k)
@@ -258,11 +257,6 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
         continue;
       }
 
-      // console.log("node", n);
-      // console.log("key", k);
-      // console.log("value", v);
-      // console.log("\n");
-
       // Have to cast here, typescript doesn't know how to match these up
       n[k] = v as T[typeof k];
       // console.log(`${k} = ${JSON.stringify(v)}`);
@@ -350,10 +344,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokeCap,
           strokeJoin,
           pluginData,
-          fillStyleId,
-          strokeStyleId,
-          effectStyleId,
-          gridStyleId,
           ...rest
         } = json;
         const f = factories[json.type]();
@@ -395,6 +385,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         n = f;
         break;
       }
+
       case "RECTANGLE":
       case "ELLIPSE":
       case "LINE":
