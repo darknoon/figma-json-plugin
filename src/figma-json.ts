@@ -1,3 +1,4 @@
+// TODO: Explain why certain things are commented out.
 // based on plugin-api.d.ts
 
 /*
@@ -19,8 +20,8 @@ export interface DumpedFigma {
 ////////////////////////////////////////////////////////////////////////////////
 // Datatypes
 
-// Only declaring this because it's used by `overrides`
-// We don't actually care about node change events
+// Need this because it's used by `overrides`
+// We don't care about node change events themselves
 export type NodeChangeProperty =
   | "pointCount"
   | "name"
@@ -134,7 +135,7 @@ export type NodeChangeProperty =
   | "code"
   | "textBackground";
 
-// This has to be something convertibla to JSON and comparable
+// This has to be something convertible to JSON and comparable
 export const MixedValue = "__Symbol(figma.mixed)__";
 export type Mixed = typeof MixedValue;
 
@@ -409,6 +410,7 @@ export type TextListOptions = {
 };
 
 export type BlendMode =
+  | "PASS_THROUGH"
   | "NORMAL"
   | "DARKEN"
   | "MULTIPLY"
@@ -645,11 +647,10 @@ export interface LayoutMixin {
 
   layoutAlign: "MIN" | "CENTER" | "MAX" | "STRETCH" | "INHERIT"; // applicable only inside auto-layout frames
   layoutGrow: number;
+  layoutPositioning: "AUTO" | "ABSOLUTE";
 }
 
-export interface BlendMixin {
-  opacity: number;
-  blendMode: "PASS_THROUGH" | BlendMode;
+export interface BlendMixin extends MinimalBlendMixin {
   isMask: boolean;
   effects: ReadonlyArray<Effect>;
   effectStyleId: string;
@@ -680,15 +681,22 @@ export interface MinimalStrokesMixin {
   strokeGeometry: VectorPaths;
 }
 
+export interface IndividualStrokesMixin {
+  strokeTopWeight: number;
+  strokeBottomWeight: number;
+  strokeLeftWeight: number;
+  strokeRightWeight: number;
+}
+
 export interface MinimalFillsMixin {
   fills: ReadonlyArray<Paint> | Mixed;
   fillStyleId: string | Mixed;
-  fillGeometry: VectorPaths;
 }
 
 export interface GeometryMixin extends MinimalStrokesMixin, MinimalFillsMixin {
   strokeCap: StrokeCap | Mixed;
   strokeMiterLimit: number;
+  fillGeometry: VectorPaths;
 }
 
 export interface CornerMixin {
@@ -759,13 +767,14 @@ export interface BaseFrameMixin
     BlendMixin,
     ConstraintMixin,
     LayoutMixin,
-    ExportMixin {
+    ExportMixin,
+    IndividualStrokesMixin {
   layoutMode: "NONE" | "HORIZONTAL" | "VERTICAL";
   primaryAxisSizingMode: "FIXED" | "AUTO"; // applicable only if layoutMode != "NONE"
   counterAxisSizingMode: "FIXED" | "AUTO"; // applicable only if layoutMode != "NONE"
 
   primaryAxisAlignItems: "MIN" | "MAX" | "CENTER" | "SPACE_BETWEEN"; // applicable only if layoutMode != "NONE"
-  counterAxisAlignItems: "MIN" | "MAX" | "CENTER"; // applicable only if layoutMode != "NONE"
+  counterAxisAlignItems: "MIN" | "MAX" | "CENTER" | "BASELINE"; // applicable only if layoutMode != "NONE"
 
   paddingLeft: number; // applicable only if layoutMode != "NONE"
   paddingRight: number; // applicable only if layoutMode != "NONE"
@@ -803,8 +812,8 @@ export interface OpaqueNodeMixin
 }
 
 export interface MinimalBlendMixin {
-  readonly opacity?: number;
-  readonly blendMode?: BlendMode;
+  opacity: number;
+  blendMode: BlendMode;
 }
 
 export interface VariantMixin {
@@ -815,7 +824,7 @@ interface ComponentPropertiesMixin {
   // readonly componentPropertyDefinitions: ComponentPropertyDefinitions;
 }
 
-export interface TextSublayerNode {
+export interface TextSublayerNode extends MinimalFillsMixin {
   // readonly hasMissingFont: boolean;
 
   paragraphIndent: number;
@@ -894,7 +903,8 @@ export interface RectangleNode
   extends DefaultShapeMixin,
     ConstraintMixin,
     CornerMixin,
-    RectangleCornerMixin {
+    RectangleCornerMixin,
+    IndividualStrokesMixin {
   readonly type: "RECTANGLE";
 }
 
@@ -946,7 +956,7 @@ export interface TextNode
 
   textAlignHorizontal: "LEFT" | "CENTER" | "RIGHT" | "JUSTIFIED";
   textAlignVertical: "TOP" | "CENTER" | "BOTTOM";
-  textAutoResize: "NONE" | "WIDTH_AND_HEIGHT" | "HEIGHT";
+  textAutoResize: "NONE" | "WIDTH_AND_HEIGHT" | "HEIGHT" | "TRUNCATE";
   autoRename: boolean;
 
   textStyleId: string | Mixed;
@@ -957,13 +967,16 @@ export type ComponentPropertyType =
   | "TEXT"
   | "INSTANCE_SWAP"
   | "VARIANT";
+
 export type InstanceSwapPreferredValue = {
   type: "COMPONENT" | "COMPONENT_SET";
   key: string;
 };
+
 export type ComponentPropertyOptions = {
   preferredValues?: InstanceSwapPreferredValue[];
 };
+
 export type ComponentPropertyDefinitions = {
   [propertyName: string]: {
     type: ComponentPropertyType;
@@ -1010,7 +1023,6 @@ export interface InstanceNode extends DefaultFrameMixin, VariantMixin {
   // isExposedInstance: boolean; TODO: look into this
   readonly overrides: {
     id: string;
-    // TODO: Does this refer to non-existing type?
     overriddenFields: NodeChangeProperty[];
   }[];
 }
@@ -1076,6 +1088,7 @@ export interface ShapeWithTextNode
     | "ENG_FOLDER";
   readonly text: TextSublayerNode;
   readonly cornerRadius?: number;
+  rotation: number;
 }
 
 export interface CodeBlockNode extends OpaqueNodeMixin, MinimalBlendMixin {
@@ -1116,6 +1129,7 @@ export interface ConnectorNode
   connectorEnd: ConnectorEndpoint;
   connectorStartStrokeCap: ConnectorStrokeCap;
   connectorEndStrokeCap: ConnectorStrokeCap;
+  rotation: number;
 }
 
 export interface WidgetNode extends OpaqueNodeMixin, StickableMixin {
@@ -1217,6 +1231,7 @@ export interface StyleConsumers {
 export interface BaseStyle extends PublishableMixin, PluginDataMixin {
   readonly id: string;
   readonly type: StyleType;
+  // TODO: Leave this out?
   readonly consumers: StyleConsumers[];
   name: string;
 }
@@ -1255,6 +1270,8 @@ export interface Image {
   readonly hash: string;
   // TODO: bytes?
   //getBytesAsync(): Promise<Uint8Array>
+  readonly width: number;
+  readonly height: number;
 }
 
 export interface Video {
