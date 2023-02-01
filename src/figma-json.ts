@@ -596,6 +596,7 @@ export interface BaseNodeMixin extends PluginDataMixin {
   // readonly parent: (BaseNode & ChildrenMixin) | null;
   name: string; // Note: setting this also sets `autoRename` to false on TextNodes
   readonly removed: boolean;
+  // TODO: Add relaunch data?
 }
 
 export interface PluginDataMixin {
