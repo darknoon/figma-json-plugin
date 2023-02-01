@@ -323,8 +323,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       TEXT: () => figma.createText(),
       FRAME: () => figma.createFrame(),
       // Is this a component instance or original component???
-      // Vincent: This is an original component
-      // Vincent: We should test this behavior...
       COMPONENT: () => figma.createComponent()
 
       // Not sceneNodes…
@@ -339,136 +337,8 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       }
     };
 
-    const convertStyleIdToKey = (styleId: string) => {
-      if (styleId === "") {
-        return "";
-      }
-
-      // TODO: add errors?
-      return styleId.split("S:")[1].split(",")[0];
-    };
-
-    const applyFillStyle = (
-      n: MinimalFillsMixin,
-      styleId: string | F.Mixed
-    ) => {
-      if (styleId === F.MixedValue) {
-        return;
-      }
-
-      const styleKey = convertStyleIdToKey(styleId);
-      if (!styleKey) {
-        return;
-      }
-
-      figma.importStyleByKeyAsync(styleKey).then((s) => {
-        n.fillStyleId = s.id;
-      });
-    };
-
-    const applyStrokeStyle = (
-      n: MinimalStrokesMixin,
-      styleId: string | F.Mixed
-    ) => {
-      if (styleId === F.MixedValue) {
-        return;
-      }
-
-      const styleKey = convertStyleIdToKey(styleId);
-      if (!styleKey) {
-        return;
-      }
-
-      figma.importStyleByKeyAsync(styleKey).then((s) => {
-        n.strokeStyleId = s.id;
-      });
-    };
-
-    const applyTextStyle = (n: TextNode, styleId: string | F.Mixed) => {
-      if (styleId === F.MixedValue) {
-        return;
-      }
-
-      const styleKey = convertStyleIdToKey(styleId);
-      if (!styleKey) {
-        return;
-      }
-
-      figma.importStyleByKeyAsync(styleKey).then((s) => {
-        n.textStyleId = s.id;
-      });
-    };
-
-    const applyEffectStyle = (n: BlendMixin, styleId: string | F.Mixed) => {
-      if (styleId === F.MixedValue) {
-        return;
-      }
-
-      const styleKey = convertStyleIdToKey(styleId);
-      if (!styleKey) {
-        return;
-      }
-
-      figma.importStyleByKeyAsync(styleKey).then((s) => {
-        n.effectStyleId = s.id;
-      });
-    };
-
-    const applyGridStyle = (n: BaseFrameMixin, styleId: string | F.Mixed) => {
-      if (styleId === F.MixedValue) {
-        return;
-      }
-
-      const styleKey = convertStyleIdToKey(styleId);
-      if (!styleKey) {
-        return;
-      }
-
-      figma.importStyleByKeyAsync(styleKey).then((s) => {
-        n.gridStyleId = s.id;
-      });
-    };
-
     let n;
     switch (json.type) {
-      case "INSTANCE": {
-        const {
-          type,
-          width,
-          children = [],
-          height,
-          strokeCap,
-          strokeJoin,
-          pluginData,
-          mainComponent,
-          // Take these out because we can't set them in an instance.
-          overflowDirection,
-          ...rest
-        } = json;
-
-        const key = mainComponent?.key;
-        if (!key) {
-          // TODO: How to handle this?
-          break;
-        }
-
-        // TODO: Should I make parent function async or not?
-        // TODO: How to handle unpublished components?
-        // TODO: Use factory?
-        // TODO: Merge this code with frame/component code?
-        // TODO: Handle assignment errors
-        figma.importComponentByKeyAsync(key).then((c) => {
-          const f = c.createInstance();
-
-          addToParent(f);
-          resizeOrLog(f, width, height);
-          safeAssign(f, rest);
-          applyPluginData(f, pluginData);
-          // TODO: Handle children?
-          n = f;
-        });
-        break;
-      }
       // Handle types with children
       case "FRAME":
       case "COMPONENT": {
@@ -492,10 +362,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
         // console.log("building children: ", children);
-        applyFillStyle(f, fillStyleId);
-        applyStrokeStyle(f, strokeStyleId);
-        applyEffectStyle(f, effectStyleId);
-        applyGridStyle(f, gridStyleId);
         children.forEach((c) => insertSceneNode(c, f));
         // console.log("applied to children ", f);
         n = f;
