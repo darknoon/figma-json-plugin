@@ -1,4 +1,3 @@
-// TODO: Explain why certain things are commented out.
 // based on plugin-api.d.ts
 
 /*
@@ -21,7 +20,6 @@ export interface DumpedFigma {
 // Datatypes
 
 // Need this because it's used by `overrides`
-// We don't care about node change events themselves
 export type NodeChangeProperty =
   | "pointCount"
   | "name"
@@ -612,7 +610,9 @@ export interface PluginDataMixin {
 export interface SceneNodeMixin {
   visible: boolean;
   locked: boolean;
+  // CONVERSION: excluding stuckNodes because it's a little cursed
   // readonly stuckNodes: SceneNode[];
+  // CONVERSION: excluding attached... for now because it's more effort than it's worth
   // readonly attachedConnectors: ConnectorNode[];
   componentPropertyReferences:
     | {
@@ -634,6 +634,7 @@ export interface ConstraintMixin {
 }
 
 export interface LayoutMixin {
+  // CONVERSION: should we use absoluteBounds?
   // readonly absoluteTransform: Transform;
   relativeTransform: Transform;
   x: number;
@@ -642,6 +643,7 @@ export interface LayoutMixin {
 
   readonly width: number;
   readonly height: number;
+  // CONVERSION: should we store absoluteBounds?
   // readonly absoluteRenderBounds: Rect | null;
   // readonly absoluteBoundingBox: Rect | null;
   constrainProportions: boolean;
@@ -1004,6 +1006,7 @@ export interface ComponentNode
     VariantMixin,
     ComponentPropertiesMixin {
   readonly type: "COMPONENT";
+  // CONVERSION: leaving out to avoid circular deps.
   // readonly instances: InstanceNode[];
 }
 
@@ -1020,8 +1023,9 @@ export interface InstanceNode extends DefaultFrameMixin, VariantMixin {
   mainComponent: ComponentNode | null;
   readonly componentProperties: ComponentProperties;
   scaleFactor: number;
+  // CONVERSION: leaving out for now to avoid circular deps
   // readonly exposedInstances: InstanceNode[];
-  // isExposedInstance: boolean; TODO: look into this
+  isExposedInstance: boolean;
   readonly overrides: {
     id: string;
     overriddenFields: NodeChangeProperty[];
@@ -1232,8 +1236,9 @@ export interface StyleConsumers {
 export interface BaseStyle extends PublishableMixin, PluginDataMixin {
   readonly id: string;
   readonly type: StyleType;
-  // TODO: Leave this out?
-  readonly consumers: StyleConsumers[];
+  // CONVERSION: excluding consumers because we don't need it
+  // leaving in the interface for future reference
+  // readonly consumers: StyleConsumers[];
   name: string;
 }
 
@@ -1271,6 +1276,7 @@ export interface Image {
   readonly hash: string;
   // TODO: bytes?
   //getBytesAsync(): Promise<Uint8Array>
+  // TODO: Ensure we save the width and height
   readonly width: number;
   readonly height: number;
 }

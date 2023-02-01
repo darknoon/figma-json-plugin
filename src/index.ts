@@ -6,18 +6,14 @@ import updateImageHashes from "./updateImageHashes";
 export * from "./figma-json";
 
 // Anything that is readonly on a SceneNode should not be set!
-// Cross check this with what's commented out in type file
 export const readBlacklist = new Set([
   "parent",
-  "removed",
   "stuckNodes",
   "__proto__",
-  "id",
-  "remote",
-  "attachedConnectors",
   "instances",
-  "componentPropertyDefinitions",
-  "masterComponent", // deprecated
+  "exposedInstances",
+  "attachedConnectors",
+  "consumers",
   // These are just redundant
   // TODO: make a setting whether to dump things like this
   "hasMissingFont",
@@ -25,26 +21,16 @@ export const readBlacklist = new Set([
   "absoluteRenderBounds",
   "absoluteBoundingBox",
   "vectorNetwork",
-  "exposedInstances"
+  // Figma shows this but plugin API doesn't support it yet
+  "playbackSettings"
 ]);
 
 // Things in figmaJSON we are not writing right now
 export const writeBlacklist = new Set([
   "id",
-  "componentPropertyReferences", // TODO?
+  "componentPropertyReferences",
   "variantProperties",
-  "componentProperties",
-  "fillGeometry", // seems to be readonly? use vectorPaths?
-  "strokeGeometry", // seems to be readonly? use vectorPaths?
-  "canUpgradeToNativeBidiSupport", // undocumented prop
-  "overrides",
-  "overlayPositionType",
-  "overlayBackground",
-  "overlayBackgroundInteraction",
-  "itemReverseZIndex",
-  "strokesIncludedInLayout",
-  "isExposedInstance", // TODO: should we even save this?
-  "fontWeight"
+  "vectorNetwork"
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
@@ -114,8 +100,8 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
 
   return {
     objects,
+    // TODO: Investigate why reading images makes the plugin crash.
     images: {}
-    // images
   };
 }
 
