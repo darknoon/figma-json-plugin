@@ -824,7 +824,10 @@ export interface VariantMixin {
 }
 
 interface ComponentPropertiesMixin {
-  readonly componentPropertyDefinitions: ComponentPropertyDefinitions;
+  // CONVERSION: excluding componentPropertyDefinitions for now because
+  // it's not crucial and we need additional logic to prevent calling
+  // it on non-component sets or variant components.
+  // readonly componentPropertyDefinitions: ComponentPropertyDefinitions;
 }
 
 export interface TextSublayerNode extends MinimalFillsMixin {

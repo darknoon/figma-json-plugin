@@ -6,6 +6,7 @@ import updateImageHashes from "./updateImageHashes";
 export * from "./figma-json";
 
 // Anything that is readonly on a SceneNode should not be set!
+// See notes in figma-json.ts for more details.
 export const readBlacklist = new Set([
   "parent",
   "stuckNodes",
@@ -14,6 +15,7 @@ export const readBlacklist = new Set([
   "exposedInstances",
   "attachedConnectors",
   "consumers",
+  "componentPropertyDefinitions",
   // These are just redundant
   // TODO: make a setting whether to dump things like this
   "hasMissingFont",
@@ -31,8 +33,7 @@ export const readBlacklist = new Set([
 export const writeBlacklist = new Set([
   "id",
   "componentPropertyReferences",
-  "variantProperties",
-  "vectorNetwork"
+  "variantProperties"
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
