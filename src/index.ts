@@ -6,27 +6,34 @@ import updateImageHashes from "./updateImageHashes";
 export * from "./figma-json";
 
 // Anything that is readonly on a SceneNode should not be set!
+// See notes in figma-json.ts for more details.
 export const readBlacklist = new Set([
   "parent",
-  "removed",
   "stuckNodes",
   "__proto__",
-  "id",
-  "remote",
+  "instances",
+  "exposedInstances",
+  "attachedConnectors",
+  "consumers",
+  "componentPropertyDefinitions",
   // These are just redundant
   // TODO: make a setting whether to dump things like this
   "hasMissingFont",
   "absoluteTransform",
   "absoluteRenderBounds",
-  "vectorNetwork"
+  "absoluteBoundingBox",
+  "vectorNetwork",
+  // Figma exposes this but plugin types don't support it yet
+  "playbackSettings",
+  // Deprecated but Figma still exposes it
+  "horizontalPadding"
 ]);
 
 // Things in figmaJSON we are not writing right now
 export const writeBlacklist = new Set([
   "id",
   "componentPropertyReferences",
-  "variantProperties",
-  "vectorNetwork"
+  "variantProperties"
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
@@ -96,8 +103,8 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
 
   return {
     objects,
+    // TODO: Investigate why reading images makes the plugin crash.
     images: {}
-    // images
   };
 }
 

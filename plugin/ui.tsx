@@ -34,16 +34,25 @@ class InsertUI extends React.Component<{
   render() {
     const { recentInsertText } = this.props;
     return (
-      <>
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden"
+        }}
+      >
         <Toolbar>
-          <button onClick={this.doInsert}>Insert</button>
+          <button onClick={this.doInsert} style={{ userSelect: "none" }}>
+            Insert
+          </button>
         </Toolbar>
         <textarea
-          style={{ width: "100%", height: "100%" }}
+          style={{ width: "100%", flex: 1 }}
           defaultValue={recentInsertText}
           ref={(t) => (this.textArea = t)}
-        ></textarea>
-      </>
+        />
+      </div>
     );
   }
 }
@@ -124,13 +133,22 @@ class UI extends React.Component {
       return <p>Waiting for data...</p>;
     } else {
       return (
-        <>
+        <div
+          style={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+          }}
+        >
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
           </Toolbar>
-          <pre>{JSON.stringify(dump, null, 2)}</pre>
+          <pre style={{ flex: 1, overflowY: "auto" }}>
+            {JSON.stringify(dump, null, 2)}
+          </pre>
           {/* <ReactJson src={dump} name={null} /> */}
-        </>
+        </div>
       );
     }
   }

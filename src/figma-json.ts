@@ -19,7 +19,121 @@ export interface DumpedFigma {
 ////////////////////////////////////////////////////////////////////////////////
 // Datatypes
 
-// This has to be something convertibla to JSON and comparable
+// Need this because it's used by `overrides`
+export type NodeChangeProperty =
+  | "pointCount"
+  | "name"
+  | "width"
+  | "height"
+  | "parent"
+  | "pluginData"
+  | "constraints"
+  | "locked"
+  | "visible"
+  | "opacity"
+  | "blendMode"
+  | "layoutGrids"
+  | "guides"
+  | "characters"
+  | "styledTextSegments"
+  | "vectorNetwork"
+  | "effects"
+  | "exportSettings"
+  | "arcData"
+  | "autoRename"
+  | "fontName"
+  | "innerRadius"
+  | "fontSize"
+  | "lineHeight"
+  | "paragraphIndent"
+  | "paragraphSpacing"
+  | "letterSpacing"
+  | "textAlignHorizontal"
+  | "textAlignVertical"
+  | "textCase"
+  | "textDecoration"
+  | "textAutoResize"
+  | "fills"
+  | "topLeftRadius"
+  | "topRightRadius"
+  | "bottomLeftRadius"
+  | "bottomRightRadius"
+  | "constrainProportions"
+  | "strokes"
+  | "strokeWeight"
+  | "strokeAlign"
+  | "strokeCap"
+  | "strokeJoin"
+  | "strokeMiterLimit"
+  | "booleanOperation"
+  | "overflowDirection"
+  | "dashPattern"
+  | "backgrounds"
+  | "handleMirroring"
+  | "cornerRadius"
+  | "cornerSmoothing"
+  | "relativeTransform"
+  | "x"
+  | "y"
+  | "rotation"
+  | "isMask"
+  | "clipsContent"
+  | "type"
+  | "overlayPositionType"
+  | "overlayBackgroundInteraction"
+  | "overlayBackground"
+  | "prototypeStartNode"
+  | "prototypeBackgrounds"
+  | "expanded"
+  | "fillStyleId"
+  | "strokeStyleId"
+  | "backgroundStyleId"
+  | "textStyleId"
+  | "effectStyleId"
+  | "gridStyleId"
+  | "description"
+  | "layoutMode"
+  | "paddingLeft"
+  | "paddingTop"
+  | "paddingRight"
+  | "paddingBottom"
+  | "itemSpacing"
+  | "layoutAlign"
+  | "counterAxisSizingMode"
+  | "primaryAxisSizingMode"
+  | "primaryAxisAlignItems"
+  | "counterAxisAlignItems"
+  | "layoutGrow"
+  | "layoutPositioning"
+  | "itemReverseZIndex"
+  | "hyperlink"
+  | "mediaData"
+  | "stokeTopWeight"
+  | "strokeBottomWeight"
+  | "strokeLeftWeight"
+  | "strokeRightWeight"
+  | "reactions"
+  | "flowStartingPoints"
+  | "shapeType"
+  | "connectorStart"
+  | "connectorEnd"
+  | "connectorLineType"
+  | "connectorStartStrokeCap"
+  | "connectorEndStrokeCap"
+  | "codeLanguage"
+  | "widgetSyncedState"
+  | "componentPropertyDefinitions"
+  | "componentPropertyReferences"
+  | "componentProperties"
+  | "embedData"
+  | "linkUnfurlData"
+  | "text"
+  | "authorVisible"
+  | "authorName"
+  | "code"
+  | "textBackground";
+
+// This has to be something convertible to JSON and comparable
 export const MixedValue = "__Symbol(figma.mixed)__";
 export type Mixed = typeof MixedValue;
 
@@ -149,13 +263,25 @@ export interface ImagePaint {
   readonly scalingFactor?: number; // setting for "TILE"
   readonly rotation?: number; // setting for "FILL" | "FIT" | "TILE"
   readonly filters?: ImageFilters;
-
   readonly visible?: boolean;
   readonly opacity?: number;
   readonly blendMode?: BlendMode;
 }
 
-export type Paint = SolidPaint | GradientPaint | ImagePaint;
+export interface VideoPaint {
+  readonly type: "VIDEO";
+  readonly scaleMode: "FILL" | "FIT" | "CROP" | "TILE";
+  readonly videoHash: string | null;
+  readonly videoTransform?: Transform;
+  readonly scalingFactor?: number;
+  readonly rotation?: number;
+  readonly filters?: ImageFilters;
+  readonly visible?: boolean;
+  readonly opacity?: number;
+  readonly blendMode?: BlendMode;
+}
+
+export type Paint = SolidPaint | GradientPaint | ImagePaint | VideoPaint;
 
 export interface Guide {
   readonly axis: "X" | "Y";
@@ -282,6 +408,7 @@ export type TextListOptions = {
 };
 
 export type BlendMode =
+  | "PASS_THROUGH"
   | "NORMAL"
   | "DARKEN"
   | "MULTIPLY"
@@ -311,6 +438,7 @@ export interface StyledTextSegment {
   end: number;
   fontSize: number;
   fontName: FontName;
+  fontWeight: number;
   textDecoration: TextDecoration;
   textCase: TextCase;
   lineHeight: LineHeight;
@@ -329,6 +457,10 @@ export type Action =
   | { readonly type: "BACK" | "CLOSE" }
   | { readonly type: "URL"; url: string }
   | {
+      readonly type: "UPDATE_MEDIA_RUNTIME";
+      readonly mediaAction: "PLAY" | "PAUSE" | "TOGGLE_PLAY_PAUSE";
+    }
+  | {
       readonly type: "NODE";
       readonly destinationId: string | null;
       readonly navigation: Navigation;
@@ -338,6 +470,7 @@ export type Action =
       // Only present if navigation == "OVERLAY" and the destination uses
       // overlay position type "RELATIVE"
       readonly overlayRelativePosition?: Vector;
+      readonly resetVideoPosition?: boolean;
     };
 
 export interface SimpleTransition {
@@ -461,6 +594,7 @@ export interface BaseNodeMixin extends PluginDataMixin {
   // readonly parent: (BaseNode & ChildrenMixin) | null;
   name: string; // Note: setting this also sets `autoRename` to false on TextNodes
   readonly removed: boolean;
+  // TODO: Add relaunch data?
 }
 
 export interface PluginDataMixin {
@@ -477,7 +611,14 @@ export interface SceneNodeMixin {
   visible: boolean;
   locked: boolean;
   // CONVERSION: excluding stuckNodes because it's a little cursed
-  // stuckNodes: SceneNode[];
+  // readonly stuckNodes: SceneNode[];
+  // CONVERSION: excluding attached... for now because it's more effort than it's worth
+  // readonly attachedConnectors: ConnectorNode[];
+  componentPropertyReferences:
+    | {
+        [nodeProperty in "visible" | "characters" | "mainComponent"]: string;
+      }
+    | null;
 }
 
 export interface StickableMixin {
@@ -502,17 +643,17 @@ export interface LayoutMixin {
 
   readonly width: number;
   readonly height: number;
-  // CONVERSION: should we sore absoluteBounds?
+  // CONVERSION: should we store absoluteBounds?
   // readonly absoluteRenderBounds: Rect | null;
+  // readonly absoluteBoundingBox: Rect | null;
   constrainProportions: boolean;
 
   layoutAlign: "MIN" | "CENTER" | "MAX" | "STRETCH" | "INHERIT"; // applicable only inside auto-layout frames
   layoutGrow: number;
+  layoutPositioning: "AUTO" | "ABSOLUTE";
 }
 
-export interface BlendMixin {
-  opacity: number;
-  blendMode: "PASS_THROUGH" | BlendMode;
+export interface BlendMixin extends MinimalBlendMixin {
   isMask: boolean;
   effects: ReadonlyArray<Effect>;
   effectStyleId: string;
@@ -536,22 +677,29 @@ export type HandleMirroring = "NONE" | "ANGLE" | "ANGLE_AND_LENGTH";
 export interface MinimalStrokesMixin {
   strokes: ReadonlyArray<Paint>;
   strokeStyleId: string;
-  strokeWeight: number;
+  strokeWeight: number | Mixed;
   strokeJoin: StrokeJoin | Mixed;
   strokeAlign: "CENTER" | "INSIDE" | "OUTSIDE";
   dashPattern: ReadonlyArray<number>;
   strokeGeometry: VectorPaths;
 }
 
+export interface IndividualStrokesMixin {
+  strokeTopWeight: number;
+  strokeBottomWeight: number;
+  strokeLeftWeight: number;
+  strokeRightWeight: number;
+}
+
 export interface MinimalFillsMixin {
   fills: ReadonlyArray<Paint> | Mixed;
   fillStyleId: string | Mixed;
-  fillGeometry: VectorPaths;
 }
 
 export interface GeometryMixin extends MinimalStrokesMixin, MinimalFillsMixin {
   strokeCap: StrokeCap | Mixed;
   strokeMiterLimit: number;
+  fillGeometry: VectorPaths;
 }
 
 export interface CornerMixin {
@@ -622,19 +770,22 @@ export interface BaseFrameMixin
     BlendMixin,
     ConstraintMixin,
     LayoutMixin,
-    ExportMixin {
+    ExportMixin,
+    IndividualStrokesMixin {
   layoutMode: "NONE" | "HORIZONTAL" | "VERTICAL";
   primaryAxisSizingMode: "FIXED" | "AUTO"; // applicable only if layoutMode != "NONE"
   counterAxisSizingMode: "FIXED" | "AUTO"; // applicable only if layoutMode != "NONE"
 
   primaryAxisAlignItems: "MIN" | "MAX" | "CENTER" | "SPACE_BETWEEN"; // applicable only if layoutMode != "NONE"
-  counterAxisAlignItems: "MIN" | "MAX" | "CENTER"; // applicable only if layoutMode != "NONE"
+  counterAxisAlignItems: "MIN" | "MAX" | "CENTER" | "BASELINE"; // applicable only if layoutMode != "NONE"
 
   paddingLeft: number; // applicable only if layoutMode != "NONE"
   paddingRight: number; // applicable only if layoutMode != "NONE"
   paddingTop: number; // applicable only if layoutMode != "NONE"
   paddingBottom: number; // applicable only if layoutMode != "NONE"
   itemSpacing: number; // applicable only if layoutMode != "NONE"
+  itemReverseZIndex: boolean; // applicable only if layoutMode != "NONE"
+  strokesIncludedInLayout: boolean; // applicable only if layoutMode != "NONE"
 
   horizontalPadding: number; // DEPRECATED: use the individual paddings
   verticalPadding: number; // DEPRECATED: use the individual paddings
@@ -654,31 +805,40 @@ export interface OpaqueNodeMixin
   extends BaseNodeMixin,
     SceneNodeMixin,
     ExportMixin {
-  readonly absoluteTransform: Transform;
+  // readonly absoluteTransform: Transform;
   relativeTransform: Transform;
   x: number;
   y: number;
   readonly width: number;
   readonly height: number;
+  // readonly absoluteBoundingBox: Rect | null;
 }
 
 export interface MinimalBlendMixin {
-  readonly opacity?: number;
-  readonly blendMode?: BlendMode;
+  opacity: number;
+  blendMode: BlendMode;
 }
 
 export interface VariantMixin {
   readonly variantProperties: { [property: string]: string } | null;
 }
 
-export interface TextSublayerNode {
-  readonly hasMissingFont: boolean;
+interface ComponentPropertiesMixin {
+  // CONVERSION: excluding componentPropertyDefinitions for now because
+  // it's not crucial and we need additional logic to prevent calling
+  // it on non-component sets or variant components.
+  // readonly componentPropertyDefinitions: ComponentPropertyDefinitions;
+}
+
+export interface TextSublayerNode extends MinimalFillsMixin {
+  // readonly hasMissingFont: boolean;
 
   paragraphIndent: number;
   paragraphSpacing: number;
 
   fontSize: number | Mixed;
   fontName: FontName | Mixed;
+  readonly fontWeight: number | Mixed;
   textCase: TextCase | Mixed;
   textDecoration: TextDecoration | Mixed;
   letterSpacing: LetterSpacing | Mixed;
@@ -749,7 +909,8 @@ export interface RectangleNode
   extends DefaultShapeMixin,
     ConstraintMixin,
     CornerMixin,
-    RectangleCornerMixin {
+    RectangleCornerMixin,
+    IndividualStrokesMixin {
   readonly type: "RECTANGLE";
 }
 
@@ -801,13 +962,40 @@ export interface TextNode
 
   textAlignHorizontal: "LEFT" | "CENTER" | "RIGHT" | "JUSTIFIED";
   textAlignVertical: "TOP" | "CENTER" | "BOTTOM";
-  textAutoResize: "NONE" | "WIDTH_AND_HEIGHT" | "HEIGHT";
+  textAutoResize: "NONE" | "WIDTH_AND_HEIGHT" | "HEIGHT" | "TRUNCATE";
   autoRename: boolean;
 
   textStyleId: string | Mixed;
 }
 
-export interface ComponentSetNode extends BaseFrameMixin, PublishableMixin {
+export type ComponentPropertyType =
+  | "BOOLEAN"
+  | "TEXT"
+  | "INSTANCE_SWAP"
+  | "VARIANT";
+
+export type InstanceSwapPreferredValue = {
+  type: "COMPONENT" | "COMPONENT_SET";
+  key: string;
+};
+
+export type ComponentPropertyOptions = {
+  preferredValues?: InstanceSwapPreferredValue[];
+};
+
+export type ComponentPropertyDefinitions = {
+  [propertyName: string]: {
+    type: ComponentPropertyType;
+    defaultValue: string | boolean;
+    preferredValues?: InstanceSwapPreferredValue[];
+    variantOptions?: string[];
+  };
+};
+
+export interface ComponentSetNode
+  extends BaseFrameMixin,
+    PublishableMixin,
+    ComponentPropertiesMixin {
   readonly type: "COMPONENT_SET";
   readonly defaultVariant: ComponentNode;
   readonly variantGroupProperties: {
@@ -818,14 +1006,33 @@ export interface ComponentSetNode extends BaseFrameMixin, PublishableMixin {
 export interface ComponentNode
   extends DefaultFrameMixin,
     PublishableMixin,
-    VariantMixin {
+    VariantMixin,
+    ComponentPropertiesMixin {
   readonly type: "COMPONENT";
+  // CONVERSION: leaving out to avoid circular deps.
+  // readonly instances: InstanceNode[];
+}
+
+export interface ComponentProperties {
+  [propertyName: string]: {
+    type: ComponentPropertyType;
+    value: string | boolean;
+    preferredValues?: InstanceSwapPreferredValue[];
+  };
 }
 
 export interface InstanceNode extends DefaultFrameMixin, VariantMixin {
   readonly type: "INSTANCE";
   mainComponent: ComponentNode | null;
+  readonly componentProperties: ComponentProperties;
   scaleFactor: number;
+  // CONVERSION: leaving out for now to avoid circular deps
+  // readonly exposedInstances: InstanceNode[];
+  isExposedInstance: boolean;
+  readonly overrides: {
+    id: string;
+    overriddenFields: NodeChangeProperty[];
+  }[];
 }
 
 export interface BooleanOperationNode
@@ -889,6 +1096,7 @@ export interface ShapeWithTextNode
     | "ENG_FOLDER";
   readonly text: TextSublayerNode;
   readonly cornerRadius?: number;
+  rotation: number;
 }
 
 export interface CodeBlockNode extends OpaqueNodeMixin, MinimalBlendMixin {
@@ -908,7 +1116,8 @@ export interface CodeBlockNode extends OpaqueNodeMixin, MinimalBlendMixin {
     | "SQL"
     | "SWIFT"
     | "KOTLIN"
-    | "RUST";
+    | "RUST"
+    | "BASH";
 }
 
 export interface LayerSublayerNode {
@@ -928,12 +1137,15 @@ export interface ConnectorNode
   connectorEnd: ConnectorEndpoint;
   connectorStartStrokeCap: ConnectorStrokeCap;
   connectorEndStrokeCap: ConnectorStrokeCap;
+  rotation: number;
 }
 
 export interface WidgetNode extends OpaqueNodeMixin, StickableMixin {
   readonly type: "WIDGET";
   readonly widgetId: string;
-  widgetSyncedState: { [key: string]: any };
+  readonly widgetSyncedState: {
+    [key: string]: any;
+  };
 }
 
 export interface EmbedData {
@@ -1010,9 +1222,26 @@ export type NodeType = BaseNode["type"];
 // Styles
 export type StyleType = "PAINT" | "TEXT" | "EFFECT" | "GRID";
 
+export type InheritedStyleField =
+  | "fillStyleId"
+  | "strokeStyleId"
+  | "backgroundStyleId"
+  | "textStyleId"
+  | "effectStyleId"
+  | "gridStyleId"
+  | "strokeStyleId";
+
+export interface StyleConsumers {
+  node: SceneNode;
+  fields: InheritedStyleField[];
+}
+
 export interface BaseStyle extends PublishableMixin, PluginDataMixin {
   readonly id: string;
   readonly type: StyleType;
+  // CONVERSION: excluding consumers because we don't need it
+  // leaving in the interface for future reference
+  // readonly consumers: StyleConsumers[];
   name: string;
 }
 
@@ -1050,4 +1279,11 @@ export interface Image {
   readonly hash: string;
   // TODO: bytes?
   //getBytesAsync(): Promise<Uint8Array>
+  // TODO: Ensure we save the width and height
+  readonly width: number;
+  readonly height: number;
+}
+
+export interface Video {
+  readonly hash: string;
 }

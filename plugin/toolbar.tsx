@@ -9,7 +9,7 @@ export const InsertButton = ({
 }: {
   onInsert: (e: React.MouseEvent) => void;
 }) => (
-  <button onClick={onInsert}>
+  <button onClick={onInsert} style={{ userSelect: "none" }}>
     Insert
     <svg
       xmlns="http://www.w3.org/2000/svg"

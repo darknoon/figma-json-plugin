@@ -62,82 +62,111 @@ const defaultTransform: F.Transform = [
 ];
 
 async function tellUIAboutStoredText() {
-  const text = await figma.clientStorage.getAsync("recentInsertText");
-  if (typeof text === "string") {
-    postMessage({ type: "updateInsertText", recentInsertText: text });
-    return;
-  }
   const l: F.FrameNode = {
     pluginData: {
       "com.layershot.meta":
         '{"layerClass":"UIWindowLayer","viewClass":"UIWindow"}'
     },
-    opacity: 1,
-    x: 207,
-    y: 448,
-    width: 414,
-    height: 896,
-    children: [],
-    backgrounds: [
-      {
-        type: "SOLID",
-        color: { r: 1, g: 0, b: 0 }
-      }
-    ],
-    clipsContent: true,
+    id: "",
     name: "Test Frame",
-    type: "FRAME",
+    removed: false,
     visible: true,
     locked: false,
+    componentPropertyReferences: null,
+    opacity: 1,
     blendMode: "PASS_THROUGH",
-    // added
-    fills: [],
-    strokes: [],
-    strokeWeight: 1,
-    strokeAlign: "OUTSIDE",
-    strokeCap: "ROUND",
-    strokeJoin: "ROUND",
-    layoutMode: "NONE",
-    primaryAxisSizingMode: "FIXED",
-    counterAxisSizingMode: "FIXED",
-    primaryAxisAlignItems: "CENTER",
-    counterAxisAlignItems: "CENTER",
-    paddingLeft: 0,
-    paddingRight: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    itemSpacing: 0,
-    horizontalPadding: 0,
-    verticalPadding: 0,
-    layoutGrids: [],
-    gridStyleId: "",
-    guides: [],
-    id: "",
-    removed: false,
-    expanded: false,
-    backgroundStyleId: "",
-    strokeMiterLimit: 0,
-    strokeStyleId: "",
-    dashPattern: [],
-    strokeGeometry: [],
+    isMask: false,
+    effects: [],
+    effectStyleId: "",
+    relativeTransform: [
+      [1, 0, 1706],
+      [0, 1, 170]
+    ],
+    x: 1706,
+    y: 170,
+    width: 375,
+    height: 812,
+    rotation: 0,
+    layoutAlign: "INHERIT",
+    constrainProportions: false,
+    layoutGrow: 0,
+    layoutPositioning: "AUTO",
+    children: [],
+    exportSettings: [],
+    fills: [
+      {
+        type: "SOLID",
+        visible: true,
+        opacity: 1,
+        blendMode: "NORMAL",
+        color: {
+          r: 1,
+          g: 1,
+          b: 1
+        }
+      }
+    ],
     fillStyleId: "",
-    fillGeometry: [],
+    strokes: [],
+    strokeStyleId: "",
+    strokeWeight: 1,
+    strokeAlign: "INSIDE",
+    strokeJoin: "MITER",
+    dashPattern: [],
+    strokeCap: "NONE",
+    strokeMiterLimit: 4,
+    fillGeometry: [
+      {
+        windingRule: "NONZERO",
+        data: "M0 0L375 0L375 812L0 812L0 0Z"
+      }
+    ],
+    strokeGeometry: [],
     cornerRadius: 0,
     cornerSmoothing: 0,
     topLeftRadius: 0,
     topRightRadius: 0,
     bottomLeftRadius: 0,
     bottomRightRadius: 0,
-    isMask: false,
-    effects: [],
-    effectStyleId: "",
-    constraints: defaultContstraints,
-    relativeTransform: defaultTransform,
-    rotation: 0,
-    constrainProportions: false,
-    layoutAlign: "CENTER",
-    layoutGrow: 0,
-    exportSettings: [],
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    primaryAxisAlignItems: "MIN",
+    counterAxisAlignItems: "MIN",
+    primaryAxisSizingMode: "AUTO",
+    strokeTopWeight: 1,
+    strokeBottomWeight: 1,
+    strokeLeftWeight: 1,
+    strokeRightWeight: 1,
+    layoutGrids: [],
+    gridStyleId: "",
+    backgrounds: [
+      {
+        type: "SOLID",
+        visible: true,
+        opacity: 1,
+        blendMode: "NORMAL",
+        color: {
+          r: 1,
+          g: 1,
+          b: 1
+        }
+      }
+    ],
+    backgroundStyleId: "",
+    clipsContent: true,
+    guides: [],
+    expanded: true,
+    constraints: {
+      horizontal: "MIN",
+      vertical: "MIN"
+    },
+    layoutMode: "NONE",
+    counterAxisSizingMode: "FIXED",
+    horizontalPadding: 0,
+    verticalPadding: 0,
+    itemSpacing: 0,
     overflowDirection: "NONE",
     numberOfFixedChildren: 0,
     overlayPositionType: "CENTER",
@@ -145,7 +174,10 @@ async function tellUIAboutStoredText() {
       type: "NONE"
     },
     overlayBackgroundInteraction: "NONE",
-    reactions: []
+    itemReverseZIndex: false,
+    strokesIncludedInLayout: false,
+    reactions: [],
+    type: "FRAME"
   };
   const basic: F.DumpedFigma = {
     objects: [l],
@@ -169,7 +201,6 @@ function tick(n: number): Promise<void> {
 }
 
 async function doInsert(data: F.DumpedFigma) {
-  figma.clientStorage.setAsync("recentInsertText", JSON.stringify(data));
   await tick(200);
   console.log("plugin inserting: ", data);
   // TODO: this is broken, not clear why...
