@@ -12,14 +12,13 @@ export default async function genDefaults() {
     STAR: figma.createStar(),
     VECTOR: figma.createVector(),
     TEXT: figma.createText(),
-    FRAME: figma.createFrame(),
-    // Is this a component instance or original component???
-    COMPONENT: figma.createComponent()
+    FRAME: figma.createFrame()
 
     // Not sceneNodes…
     // PAGE: figma.createPage(),
     // SLICE: figma.createSlice()
   };
+
   const k = Object.keys(defaults);
   const v = Object.values(defaults);
   const { objects } = await dump(v);

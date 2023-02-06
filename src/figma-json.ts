@@ -787,8 +787,9 @@ export interface BaseFrameMixin
   itemReverseZIndex: boolean; // applicable only if layoutMode != "NONE"
   strokesIncludedInLayout: boolean; // applicable only if layoutMode != "NONE"
 
-  horizontalPadding: number; // DEPRECATED: use the individual paddings
-  verticalPadding: number; // DEPRECATED: use the individual paddings
+  // CONVERSION: excluding because deprecated
+  // horizontalPadding: number;
+  // verticalPadding: number;
 
   layoutGrids: ReadonlyArray<LayoutGrid>;
   gridStyleId: string;
@@ -847,9 +848,9 @@ export interface TextSublayerNode extends MinimalFillsMixin {
 
   characters: string;
 
-  // CONVERSION from getStyledTextSegments()
-  // TODO: can we get info about range
-  styledTextSegments: ReadonlyArray<StyledTextSegment>;
+  // CONVERSION: this is our own representation of getStyledTextSegments()
+  // but commenting out until we support it
+  // styledTextSegments: ReadonlyArray<StyledTextSegment>;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
