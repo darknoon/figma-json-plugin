@@ -11,7 +11,14 @@ export interface InsertMessage {
   data: F.DumpedFigma;
 }
 
-export type UIToPluginMessage = ReadyMessage | InsertMessage;
+export interface LogDefaultsMessage {
+  type: "logDefaults";
+}
+
+export type UIToPluginMessage =
+  | ReadyMessage
+  | InsertMessage
+  | LogDefaultsMessage;
 
 /// Messages Plugin code sends to UI
 

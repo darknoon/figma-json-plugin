@@ -5,6 +5,8 @@ import updateImageHashes from "./updateImageHashes";
 // Expose types for our consumers to interact with
 export * from "./figma-json";
 
+export { default as defaultLayers } from "./figma-default-layers";
+
 // Anything that is readonly on a SceneNode should not be set!
 // See notes in figma-json.ts for more details.
 export const readBlacklist = new Set([
@@ -23,10 +25,13 @@ export const readBlacklist = new Set([
   "absoluteRenderBounds",
   "absoluteBoundingBox",
   "vectorNetwork",
-  // Figma exposes this but plugin types don't support it yet
+  // Figma exposes this but plugin types don't support them yet
   "playbackSettings",
+  "listSpacing",
+  "canUpgradeToNativeBidiSupport",
   // Deprecated but Figma still exposes it
-  "horizontalPadding"
+  "horizontalPadding",
+  "verticalPadding"
 ]);
 
 // Things in figmaJSON we are not writing right now
