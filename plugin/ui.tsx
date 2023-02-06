@@ -117,6 +117,10 @@ class UI extends React.Component {
     this.setState({ showInsert: true });
   };
 
+  logDefaults = () => {
+    parent.postMessage({ pluginMessage: { type: "logDefaults" } }, "*");
+  };
+
   render() {
     const { dump, showInsert, inserting, recentInsertText } = this.state;
     if (inserting) {
@@ -142,16 +146,7 @@ class UI extends React.Component {
         >
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
-            <button
-              onClick={() => {
-                parent.postMessage(
-                  { pluginMessage: { type: "logDefaults" } },
-                  "*"
-                );
-              }}
-            >
-              Log defaults
-            </button>
+            <button onClick={this.logDefaults}>Log defaults</button>
           </Toolbar>
           <pre style={{ flex: 1, overflowY: "auto" }}>
             {JSON.stringify(dump, null, 2)}
