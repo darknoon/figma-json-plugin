@@ -95,7 +95,6 @@ async function doInsert(data: F.DumpedFigma) {
   postMessage({ type: "didInsert" });
 }
 
-// TODO: expose this in plugin
 async function logDefaults() {
   const defaults = await genDefaults();
   console.log("defaults: ", defaults);
