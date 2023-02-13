@@ -63,16 +63,19 @@ function isVisible(n: any) {
     return true;
   }
 
-  return n.visible && n.opacity > 0 && !n.removed;
+  return n.visible && n.opacity > 0.001 && !n.removed;
 }
 
 export async function dump(
   n: readonly SceneNode[],
-  skipInvisibleNodes: boolean = true
+  options: { skipInvisibleNodes: boolean } = { skipInvisibleNodes: true }
 ): Promise<F.DumpedFigma> {
   type AnyObject = { [name: string]: any };
+  const { skipInvisibleNodes } = options;
 
-  // If skipInvisibleNodes is true, skip invisible nodes/their descendants inside instances.
+  // Capture original value in case we change it.
+  const oldSkipInvisibleInstanceChildren = figma.skipInvisibleInstanceChildren;
+  // If skipInvisibleNodes is true, skip invisible nodes/their descendants inside *instances*.
   // This only covers instances, and doesn't consider opacity etc.
   // We could filter out these nodes ourselves but it's more efficient when
   // Figma doesn't include them in in the first place.
@@ -141,7 +144,7 @@ export async function dump(
   const images = Object.fromEntries(await Promise.all(dataRequests));
 
   // Reset skipInvisibleInstanceChildren to not affect other code.
-  figma.skipInvisibleInstanceChildren = false;
+  figma.skipInvisibleInstanceChildren = oldSkipInvisibleInstanceChildren;
 
   return {
     objects,
