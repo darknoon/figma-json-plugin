@@ -18,6 +18,8 @@ body {
 
 // Cause our plugin to show
 figma.showUI(html, { width: 400, height: 400 });
+// Inside instances, skip over invisible nodes and their descendants for speed.
+figma.skipInvisibleInstanceChildren = true;
 
 console.log("This in plugin:", globalThis);
 

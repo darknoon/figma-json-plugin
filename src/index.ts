@@ -45,6 +45,27 @@ function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
 }
 
+// Returns true if n is a visible SceneNode or
+// not a SceneNode (e.g. a string, number, etc.)
+function isVisible(n: any) {
+  if (typeof n !== "object") {
+    return true;
+  }
+
+  if (
+    !("visible" in n) ||
+    typeof n.visible !== "boolean" ||
+    !("opacity" in n) ||
+    typeof n.opacity !== "number" ||
+    !("removed" in n) ||
+    typeof n.removed !== "boolean"
+  ) {
+    return true;
+  }
+
+  return n.visible && n.opacity > 0 && !n.removed;
+}
+
 export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
   type AnyObject = { [name: string]: any };
 
@@ -65,7 +86,7 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
     switch (typeof n) {
       case "object": {
         if (Array.isArray(n)) {
-          return n.map((v) => _dump(v));
+          return n.filter(isVisible).map((v) => _dump(v));
         } else if (n === null) {
           return null;
         } else if (n.__proto__ !== undefined) {
@@ -92,7 +113,7 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
     }
   };
 
-  const objects = n.map(_dump);
+  const objects = n.filter(isVisible).map(_dump);
 
   const dataRequests = [...imageHashes].map(async (hash: string) => {
     const im = figma.getImageByHash(hash);
