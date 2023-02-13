@@ -45,8 +45,41 @@ function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
 }
 
-export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
+// Returns true if n is a visible SceneNode or
+// not a SceneNode (e.g. a string, number, etc.)
+function isVisible(n: any) {
+  if (typeof n !== "object") {
+    return true;
+  }
+
+  if (
+    !("visible" in n) ||
+    typeof n.visible !== "boolean" ||
+    !("opacity" in n) ||
+    typeof n.opacity !== "number" ||
+    !("removed" in n) ||
+    typeof n.removed !== "boolean"
+  ) {
+    return true;
+  }
+
+  return n.visible && n.opacity > 0.001 && !n.removed;
+}
+
+export async function dump(
+  n: readonly SceneNode[],
+  options: { skipInvisibleNodes: boolean } = { skipInvisibleNodes: true }
+): Promise<F.DumpedFigma> {
   type AnyObject = { [name: string]: any };
+  const { skipInvisibleNodes } = options;
+
+  // Capture original value in case we change it.
+  const oldSkipInvisibleInstanceChildren = figma.skipInvisibleInstanceChildren;
+  // If skipInvisibleNodes is true, skip invisible nodes/their descendants inside *instances*.
+  // This only covers instances, and doesn't consider opacity etc.
+  // We could filter out these nodes ourselves but it's more efficient when
+  // Figma doesn't include them in in the first place.
+  figma.skipInvisibleInstanceChildren = skipInvisibleNodes;
 
   // Images we need to request and append to our dump
   const imageHashes = new Set<string>();
@@ -65,7 +98,9 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
     switch (typeof n) {
       case "object": {
         if (Array.isArray(n)) {
-          return n.map((v) => _dump(v));
+          return n
+            .filter((v) => !skipInvisibleNodes || isVisible(v))
+            .map((v) => _dump(v));
         } else if (n === null) {
           return null;
         } else if (n.__proto__ !== undefined) {
@@ -92,7 +127,9 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
     }
   };
 
-  const objects = n.map(_dump);
+  const objects = n
+    .filter((v) => !skipInvisibleNodes || isVisible(v))
+    .map(_dump);
 
   const dataRequests = [...imageHashes].map(async (hash: string) => {
     const im = figma.getImageByHash(hash);
@@ -105,6 +142,9 @@ export async function dump(n: readonly SceneNode[]): Promise<F.DumpedFigma> {
   });
 
   const images = Object.fromEntries(await Promise.all(dataRequests));
+
+  // Reset skipInvisibleInstanceChildren to not affect other code.
+  figma.skipInvisibleInstanceChildren = oldSkipInvisibleInstanceChildren;
 
   return {
     objects,
