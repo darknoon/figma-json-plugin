@@ -81,7 +81,10 @@ const defaultOptions: Options = {
 
 function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
   // Ignore geometry keys if geometry is set to "none"
-  // These keys match the Figma REST API.
+  // Copied these keys from the Figma REST API.
+  // "size" represents width/height of elements and is different
+  // from the width/height of the bounding box:
+  // https://www.figma.com/developers/api#frame-props
   if (options.geometry === "none") {
     return new Set([
       ...readBlacklist,
