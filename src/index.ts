@@ -14,6 +14,7 @@ export const readBlacklist = new Set([
   "stuckNodes",
   "__proto__",
   "instances",
+  "removed",
   "exposedInstances",
   "attachedConnectors",
   "consumers",
