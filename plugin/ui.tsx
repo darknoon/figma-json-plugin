@@ -146,7 +146,9 @@ class UI extends React.Component {
         >
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
-            <button onClick={this.logDefaults}>Log defaults</button>
+            <button onClick={this.logDefaults} style={{ userSelect: "none" }}>
+              Log defaults
+            </button>
           </Toolbar>
           <pre style={{ flex: 1, overflowY: "auto" }}>
             {JSON.stringify(dump, null, 2)}
