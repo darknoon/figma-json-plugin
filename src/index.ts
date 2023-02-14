@@ -95,7 +95,7 @@ function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
     ]);
   }
 
-  // Ignore geometry keys if node is a text node
+  // Never include text outline geometry
   if ("type" in n && n.type === "TEXT") {
     return new Set([...readBlacklist, "fillGeometry", "strokeGeometry"]);
   }
