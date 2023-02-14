@@ -26,6 +26,8 @@ export const readBlacklist = new Set([
   "absoluteRenderBounds",
   "absoluteBoundingBox",
   "vectorNetwork",
+  "mainComponent",
+  "masterComponent",
   // Figma exposes this but plugin types don't support them yet
   "playbackSettings",
   "listSpacing",
