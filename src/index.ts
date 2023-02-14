@@ -80,7 +80,6 @@ export async function dump(
   n: readonly SceneNode[],
   options: { skipInvisibleNodes: boolean } = { skipInvisibleNodes: true }
 ): Promise<F.DumpedFigma> {
-  console.log("AAAA dumping", n);
   type AnyObject = { [name: string]: any };
   const { skipInvisibleNodes } = options;
 
