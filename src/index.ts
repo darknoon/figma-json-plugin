@@ -66,6 +66,14 @@ function isVisible(n: any) {
   return n.visible && n.opacity > 0.001 && !n.removed;
 }
 
+function conditionalReadBlacklist(n: any) {
+  if ("type" in n && n.type === "TEXT") {
+    return new Set([...readBlacklist, "fillGeometry", "strokeGeometry"]);
+  } else {
+    return readBlacklist;
+  }
+}
+
 export async function dump(
   n: readonly SceneNode[],
   options: { skipInvisibleNodes: boolean } = { skipInvisibleNodes: true }
@@ -105,8 +113,9 @@ export async function dump(
           return null;
         } else if (n.__proto__ !== undefined) {
           // Merge keys from __proto__ with natural keys
+          const blacklistKeys = conditionalReadBlacklist(n);
           const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
-            (k) => !readBlacklist.has(k)
+            (k) => !blacklistKeys.has(k)
           );
           return _dumpObject(n, keys);
         } else {
