@@ -69,20 +69,44 @@ function isVisible(n: any) {
   return n.visible && n.opacity > 0.001 && !n.removed;
 }
 
-function conditionalReadBlacklist(n: any) {
+interface Options {
+  skipInvisibleNodes: boolean;
+  geometry: "none" | "paths";
+}
+
+const defaultOptions: Options = {
+  skipInvisibleNodes: true,
+  geometry: "none"
+};
+
+function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
+  // Ignore geometry keys if geometry is set to "none"
+  // These keys match the Figma REST API.
+  if (options.geometry === "none") {
+    return new Set([
+      ...readBlacklist,
+      "fillGeometry",
+      "strokeGeometry",
+      "size",
+      "relativeTransform"
+    ]);
+  }
+
+  // Ignore geometry keys if node is a text node
   if ("type" in n && n.type === "TEXT") {
     return new Set([...readBlacklist, "fillGeometry", "strokeGeometry"]);
-  } else {
-    return readBlacklist;
   }
+
+  return readBlacklist;
 }
 
 export async function dump(
   n: readonly SceneNode[],
-  options: { skipInvisibleNodes: boolean } = { skipInvisibleNodes: true }
+  options: Partial<Options> = {}
 ): Promise<F.DumpedFigma> {
   type AnyObject = { [name: string]: any };
-  const { skipInvisibleNodes } = options;
+  const opts: Options = { ...defaultOptions, ...options };
+  const { skipInvisibleNodes } = opts;
 
   // Capture original value in case we change it.
   const oldSkipInvisibleInstanceChildren = figma.skipInvisibleInstanceChildren;
@@ -116,7 +140,7 @@ export async function dump(
           return null;
         } else if (n.__proto__ !== undefined) {
           // Merge keys from __proto__ with natural keys
-          const blacklistKeys = conditionalReadBlacklist(n);
+          const blacklistKeys = conditionalReadBlacklist(n, opts);
           const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
             (k) => !blacklistKeys.has(k)
           );
