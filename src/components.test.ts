@@ -90,25 +90,18 @@ test("Takes component sets in the document and produces component set ids like t
       name: "My Nice Component",
       description: "",
       remote: false,
-      documentationLinks: []
+      documentationLinks: [],
+      componentSetId: "123:789"
     }
   };
-  const componentSets: F.ComponentMap = {
-    "123:456": {
-      key: "baby",
-      name: "My Nice Component",
-      description: "",
-      remote: false,
-      documentationLinks: []
-    }
-  };
-  expect(d.components).toEqual(components);
-  expect(d.componentSets).toEqual({
+  const componentSets: F.ComponentSetMap = {
     "123:789": {
       key: "baby-set",
       name: "My Nice Component Set",
       description: "",
       remote: false
     }
-  });
+  };
+  expect(d.components).toEqual(components);
+  expect(d.componentSets).toEqual(componentSets);
 });

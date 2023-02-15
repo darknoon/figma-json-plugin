@@ -127,9 +127,11 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
     if (k === "mainComponent" && v) {
       // ok v should be a component
       const component = v as ComponentNode;
+      let componentSetId;
       if (component.parent?.type === "COMPONENT_SET") {
         const componentSet = component.parent as ComponentSetNode;
         const { name, description, key, remote } = componentSet;
+        componentSetId = componentSet.id;
         ctx.componentSets[componentSet.id] = {
           key,
           name,
@@ -143,6 +145,7 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
         key,
         description,
         remote,
+        componentSetId,
         // need to copy these b/c they are readonly
         documentationLinks: _dump(documentationLinks, ctx)
       };
