@@ -1,5 +1,6 @@
 // Copyright 2019 Andrew Pouliot
 import * as F from "./figma-json";
+import { saveFigmaState, restoreFigmaState } from "./figmaState";
 import updateImageHashes from "./updateImageHashes";
 
 // Expose types for our consumers to interact with
@@ -71,11 +72,14 @@ function isVisible(n: any) {
 
 interface Options {
   skipInvisibleNodes: boolean;
+  images: boolean;
   geometry: "none" | "paths";
 }
 
 const defaultOptions: Options = {
   skipInvisibleNodes: true,
+  // TODO: Investigate why reading images makes the plugin crash. Otherwise we could have this be true by default.
+  images: false,
   geometry: "none"
 };
 
@@ -103,74 +107,79 @@ function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
   return readBlacklist;
 }
 
-export async function dump(
-  n: readonly SceneNode[],
-  options: Partial<Options> = {}
-): Promise<F.DumpedFigma> {
-  type AnyObject = { [name: string]: any };
-  const opts: Options = { ...defaultOptions, ...options };
-  const { skipInvisibleNodes } = opts;
+type AnyObject = { [name: string]: any };
 
-  // Capture original value in case we change it.
-  const oldSkipInvisibleInstanceChildren = figma.skipInvisibleInstanceChildren;
-  // If skipInvisibleNodes is true, skip invisible nodes/their descendants inside *instances*.
-  // This only covers instances, and doesn't consider opacity etc.
-  // We could filter out these nodes ourselves but it's more efficient when
-  // Figma doesn't include them in in the first place.
-  figma.skipInvisibleInstanceChildren = skipInvisibleNodes;
+class DumpContext {
+  constructor(public options: Options) {}
 
   // Images we need to request and append to our dump
-  const imageHashes = new Set<string>();
+  imageHashes = new Set<string>();
+  components: F.ComponentMap = {};
+  componentSets: F.ComponentSetMap = {};
+}
 
-  const _dumpObject = (n: AnyObject, keys: readonly string[]) =>
-    keys.reduce((o, k) => {
-      const v = n[k];
-      if (k === "imageHash" && typeof v === "string") {
-        imageHashes.add(v);
-      }
-      o[k] = _dump(v);
-      return o;
-    }, {} as AnyObject);
-
-  const _dump = (n: any): any => {
-    switch (typeof n) {
-      case "object": {
-        if (Array.isArray(n)) {
-          return n
-            .filter((v) => !skipInvisibleNodes || isVisible(v))
-            .map((v) => _dump(v));
-        } else if (n === null) {
-          return null;
-        } else if (n.__proto__ !== undefined) {
-          // Merge keys from __proto__ with natural keys
-          const blacklistKeys = conditionalReadBlacklist(n, opts);
-          const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
-            (k) => !blacklistKeys.has(k)
-          );
-          return _dumpObject(n, keys);
-        } else {
-          const keys = Object.keys(n);
-          return _dumpObject(n, keys);
-        }
-      }
-      case "function":
-        return undefined;
-      case "symbol":
-        if (n === figma.mixed) {
-          return "__Symbol(figma.mixed)__";
-        } else {
-          return String(n);
-        }
-      default:
-        return n;
+function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
+  return keys.reduce((o, k) => {
+    const v = n[k];
+    if (k === "imageHash" && typeof v === "string") {
+      ctx.imageHashes.add(v);
     }
-  };
+    // If this is a reference to a mainComponent, we want to instead add the componentId
+    if (k === "mainComponent" && v) {
+      // ok v should be a component
+      const component = v as ComponentNode;
+      const { name, key, description, documentationLinks, remote } = component;
+      ctx.components[component.id] = {
+        name,
+        key,
+        description,
+        remote,
+        documentationLinks: structuredClone(documentationLinks)
+      };
+      o["componentId"] = v.id;
+      return o;
+    }
+    o[k] = _dump(v, ctx);
+    return o;
+  }, {} as AnyObject);
+}
 
-  const objects = n
-    .filter((v) => !skipInvisibleNodes || isVisible(v))
-    .map(_dump);
+function _dump(n: any, ctx: DumpContext): any {
+  switch (typeof n) {
+    case "object": {
+      if (Array.isArray(n)) {
+        return n
+          .filter((v) => !ctx.options.skipInvisibleNodes || isVisible(v))
+          .map((v) => _dump(v, ctx));
+      } else if (n === null) {
+        return null;
+      } else if (n.__proto__ !== undefined) {
+        // Merge keys from __proto__ with natural keys
+        const blacklistKeys = conditionalReadBlacklist(n, ctx.options);
+        const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
+          (k) => !blacklistKeys.has(k)
+        );
+        return _dumpObject(n, keys, ctx);
+      } else {
+        const keys = Object.keys(n);
+        return _dumpObject(n, keys, ctx);
+      }
+    }
+    case "function":
+      return undefined;
+    case "symbol":
+      if (n === figma.mixed) {
+        return "__Symbol(figma.mixed)__";
+      } else {
+        return String(n);
+      }
+    default:
+      return n;
+  }
+}
 
-  const dataRequests = [...imageHashes].map(async (hash: string) => {
+async function requestImages(ctx: DumpContext): Promise<F.ImageMap> {
+  const imageRequests = [...ctx.imageHashes].map(async (hash: string) => {
     const im = figma.getImageByHash(hash);
     if (im === null) {
       throw new Error(`Image not found: ${hash}`);
@@ -180,15 +189,37 @@ export async function dump(
     return [hash, dat] as [string, Uint8Array];
   });
 
-  const images = Object.fromEntries(await Promise.all(dataRequests));
+  const r = await Promise.all(imageRequests);
+  return Object.fromEntries(r);
+}
+
+export async function dump(
+  n: readonly SceneNode[],
+  options: Partial<Options> = {}
+): Promise<F.DumpedFigma> {
+  const resolvedOptions: Options = { ...defaultOptions, ...options };
+  const { skipInvisibleNodes } = resolvedOptions;
+
+  saveFigmaState();
+
+  const ctx = new DumpContext(resolvedOptions);
+
+  const objects = n
+    .filter((v) => !skipInvisibleNodes || isVisible(v))
+    .map((o) => _dump(o, ctx));
+
+  const images = resolvedOptions.images ? await requestImages(ctx) : {};
 
   // Reset skipInvisibleInstanceChildren to not affect other code.
-  figma.skipInvisibleInstanceChildren = oldSkipInvisibleInstanceChildren;
+  restoreFigmaState();
+
+  const { components, componentSets } = ctx;
 
   return {
     objects,
-    // TODO: Investigate why reading images makes the plugin crash.
-    images: {}
+    components,
+    componentSets,
+    images
   };
 }
 
