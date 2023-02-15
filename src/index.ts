@@ -27,7 +27,6 @@ export const readBlacklist = new Set([
   "absoluteRenderBounds",
   "absoluteBoundingBox",
   "vectorNetwork",
-  "mainComponent",
   "masterComponent",
   // Figma exposes this but plugin types don't support them yet
   "playbackSettings",
@@ -128,13 +127,24 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
     if (k === "mainComponent" && v) {
       // ok v should be a component
       const component = v as ComponentNode;
+      if (component.parent?.type === "COMPONENT_SET") {
+        const componentSet = component.parent as ComponentSetNode;
+        const { name, description, key, remote } = componentSet;
+        ctx.componentSets[componentSet.id] = {
+          key,
+          name,
+          description,
+          remote
+        };
+      }
       const { name, key, description, documentationLinks, remote } = component;
       ctx.components[component.id] = {
         name,
         key,
         description,
         remote,
-        documentationLinks: structuredClone(documentationLinks)
+        // need to copy these b/c they are readonly
+        documentationLinks: _dump(documentationLinks, ctx)
       };
       o["componentId"] = v.id;
       return o;
