@@ -1,5 +1,4 @@
 import * as F from "./figma-json";
-// import components from "./components";
 import defaultLayers from "./figma-default-layers";
 import { dump } from ".";
 

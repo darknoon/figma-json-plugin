@@ -14,13 +14,10 @@ export default async function genDefaults() {
     TEXT: figma.createText(),
     FRAME: figma.createFrame()
 
-    // Ok
-    //COMPONENT: figma.createComponent()
-    //PAGE: figma.createPage()
-
     // Not sceneNodes…
     // PAGE: figma.createPage(),
     // SLICE: figma.createSlice()
+    //COMPONENT: figma.createComponent()
   };
 
   const k = Object.keys(defaults);
