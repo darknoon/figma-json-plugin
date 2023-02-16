@@ -151,7 +151,12 @@ class UI extends React.Component {
             </button>
           </Toolbar>
           <pre style={{ flex: 1, overflowY: "auto" }}>
-            {JSON.stringify(dump, null, 2)}
+            {JSON.stringify(
+              dump,
+              (key: string, value: any) =>
+                value instanceof Uint8Array ? `<${value.length} bytes>` : value,
+              2
+            )}
           </pre>
           {/* <ReactJson src={dump} name={null} /> */}
         </div>

@@ -11,9 +11,54 @@
 
 export type Base64String = string;
 
+/**	"components": {
+		"102:9236": {
+			"key": "4bae8a3530377b33f040438a0fe00a9055736b17",
+			"name": "icon / 24 / dasboard",
+			"description": "",
+			"remote": true,
+			"documentationLinks": []
+		},
+ */
+
+// TODO: extend PublishableMixin (publishStatus is missing)
+export interface ComponentInfo {
+  key: string;
+  name: string;
+  description: string;
+  remote: boolean;
+  componentSetId?: string;
+  documentationLinks: ReadonlyArray<DocumentationLink>;
+}
+
+/**
+ * 	"componentSets": {
+		"102:9330": {
+			"key": "480be1061cf75ce3874204fe4987860c4e732623",
+			"name": "面积图",
+			"description": "",
+			"remote": true
+		}
+
+ * */
+// TODO: extend PublishableMixin (publishStatus is missing)
+export interface ComponentSetInfo {
+  key: string;
+  name: string;
+  description: string;
+  remote: boolean;
+  documentationLinks: ReadonlyArray<DocumentationLink>;
+}
+
+export type ComponentMap = Record<string, ComponentInfo>;
+export type ComponentSetMap = Record<string, ComponentSetInfo>;
+export type ImageMap = { [hash: string]: Uint8Array };
+
 export interface DumpedFigma {
   objects: SceneNode[];
-  images: { [hash: string]: Uint8Array };
+  components: ComponentMap;
+  componentSets: ComponentSetMap;
+  images: ImageMap;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1024,7 +1069,9 @@ export interface ComponentProperties {
 
 export interface InstanceNode extends DefaultFrameMixin, VariantMixin {
   readonly type: "INSTANCE";
-  mainComponent: ComponentNode | null;
+  // CONVERSION: Use the componentId to look up the component in the result instead of recursively defining this
+  componentId: string;
+  // mainComponent: ComponentNode | null;
   readonly componentProperties: ComponentProperties;
   scaleFactor: number;
   // CONVERSION: leaving out for now to avoid circular deps

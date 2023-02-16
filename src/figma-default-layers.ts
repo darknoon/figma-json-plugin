@@ -11,6 +11,7 @@ const defaultLayers: {
   VECTOR: F.VectorNode;
   TEXT: F.TextNode;
   FRAME: F.FrameNode;
+  PAGE: F.PageNode;
 } = {
   RECTANGLE: {
     id: "_",
@@ -598,6 +599,45 @@ const defaultLayers: {
     strokesIncludedInLayout: false,
     reactions: [],
     type: "FRAME"
+  },
+  PAGE: {
+    id: "_",
+    name: "Page",
+    removed: false,
+    children: [],
+    guides: [],
+    selection: [],
+    selectedTextRange: null,
+    backgrounds: [
+      {
+        type: "SOLID",
+        visible: true,
+        opacity: 1,
+        blendMode: "NORMAL",
+        color: {
+          r: 0.9624999761581421,
+          g: 0.9624999761581421,
+          b: 0.9624999761581421
+        }
+      }
+    ],
+    exportSettings: [],
+    prototypeStartNode: null,
+    flowStartingPoints: [],
+    prototypeBackgrounds: [
+      {
+        type: "SOLID",
+        visible: true,
+        opacity: 0,
+        blendMode: "NORMAL",
+        color: {
+          r: 0,
+          g: 0,
+          b: 0
+        }
+      }
+    ],
+    type: "PAGE"
   }
 };
 

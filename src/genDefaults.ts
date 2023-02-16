@@ -17,6 +17,7 @@ export default async function genDefaults() {
     // Not sceneNodes…
     // PAGE: figma.createPage(),
     // SLICE: figma.createSlice()
+    //COMPONENT: figma.createComponent()
   };
 
   const k = Object.keys(defaults);
