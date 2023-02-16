@@ -1,14 +1,10 @@
 let skipState: boolean | undefined;
 
-export function saveFigmaState() {
+export function saveFigmaState(skipInvisibleInstanceChildren: boolean) {
   if ("figma" in globalThis) {
     // Capture original value in case we change it.
     skipState = figma.skipInvisibleInstanceChildren;
-    // If skipInvisibleNodes is true, skip invisible nodes/their descendants inside *instances*.
-    // This only covers instances, and doesn't consider opacity etc.
-    // We could filter out these nodes ourselves but it's more efficient when
-    // Figma doesn't include them in in the first place.
-    figma.skipInvisibleInstanceChildren = true;
+    figma.skipInvisibleInstanceChildren = skipInvisibleInstanceChildren;
   }
 }
 export function restoreFigmaState() {

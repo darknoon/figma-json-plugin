@@ -12,10 +12,10 @@ export default async function genDefaults() {
     STAR: figma.createStar(),
     VECTOR: figma.createVector(),
     TEXT: figma.createText(),
-    FRAME: figma.createFrame(),
+    FRAME: figma.createFrame()
 
     // Ok
-    COMPONENT: figma.createComponent()
+    //COMPONENT: figma.createComponent()
     //PAGE: figma.createPage()
 
     // Not sceneNodes…

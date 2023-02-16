@@ -1,6 +1,9 @@
 // Copyright 2019 Andrew Pouliot
 import * as F from "./figma-json";
-import { saveFigmaState, restoreFigmaState } from "./figmaState";
+import {
+  saveFigmaState as useFigmaState,
+  restoreFigmaState
+} from "./figmaState";
 import updateImageHashes from "./updateImageHashes";
 
 // Expose types for our consumers to interact with
@@ -214,7 +217,11 @@ export async function dump(
   const resolvedOptions: Options = { ...defaultOptions, ...options };
   const { skipInvisibleNodes } = resolvedOptions;
 
-  saveFigmaState();
+  // If skipInvisibleNodes is true, skip invisible nodes/their descendants inside *instances*.
+  // This only covers instances, and doesn't consider opacity etc.
+  // We could filter out these nodes ourselves but it's more efficient when
+  // Figma doesn't include them in in the first place.
+  useFigmaState(skipInvisibleNodes);
 
   const ctx = new DumpContext(resolvedOptions);
 
