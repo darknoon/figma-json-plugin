@@ -103,6 +103,7 @@ test("Takes component sets in the document and produces component set ids like t
       key: "83218ac34c1834c26781fe4bde918ee4",
       name: "Rounded Button",
       description: "A rounded button with a few variants",
+      documentationLinks: [],
       remote: false
     }
   };

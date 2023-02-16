@@ -63,6 +63,8 @@ async function tellUIAboutStoredText() {
 
   const basic: F.DumpedFigma = {
     objects: [l],
+    components: {},
+    componentSets: {},
     images: {}
   };
   postMessage({
@@ -103,7 +105,9 @@ async function logDefaults() {
 async function updateUIWithSelection() {
   try {
     // Dump document selection to JSON
-    const data = await dump(figma.currentPage.selection);
+    const opt = { images: true };
+    console.log("dumping...", opt);
+    const data = await dump(figma.currentPage.selection, opt);
     postMessage({ type: "update", data });
   } catch (e) {
     console.error("error during plugin: ", e);
