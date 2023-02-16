@@ -20,13 +20,15 @@ export type Base64String = string;
 			"documentationLinks": []
 		},
  */
+
+// TODO: extend PublishableMixin (publishStatus is missing)
 export interface ComponentInfo {
   key: string;
   name: string;
   description: string;
   remote: boolean;
   componentSetId?: string;
-  documentationLinks: { uri: string }[];
+  documentationLinks: ReadonlyArray<DocumentationLink>;
 }
 
 /**
@@ -39,11 +41,13 @@ export interface ComponentInfo {
 		}
 
  * */
+// TODO: extend PublishableMixin (publishStatus is missing)
 export interface ComponentSetInfo {
   key: string;
   name: string;
   description: string;
   remote: boolean;
+  documentationLinks: ReadonlyArray<DocumentationLink>;
 }
 
 export type ComponentMap = Record<string, ComponentInfo>;

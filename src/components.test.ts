@@ -12,8 +12,8 @@ test("Takes components in the document and produces component ids like the REST 
   const sourceComponent = {
     ...defaultLayers.FRAME,
     type: "COMPONENT",
-    name: "My Nice Component",
-    key: "baby",
+    name: "Info Button",
+    key: "6848d756da66e55b42f79c0728e351ad",
     id: "123:456",
     backgrounds: [{ type: "IMAGE", imageHash: "A", scaleMode: "FILL" }],
     documentationLinks: [],
@@ -25,6 +25,7 @@ test("Takes components in the document and produces component ids like the REST 
   const sourceInstance = {
     ...defaultLayers.FRAME,
     type: "INSTANCE",
+    name: "Info Button",
     mainComponent: sourceComponent,
     children: []
   };
@@ -33,8 +34,8 @@ test("Takes components in the document and produces component ids like the REST 
 
   const expected: F.ComponentMap = {
     "123:456": {
-      key: "baby",
-      name: "My Nice Component",
+      key: "6848d756da66e55b42f79c0728e351ad",
+      name: "Info Button",
       description: "",
       remote: false,
       documentationLinks: []
@@ -49,22 +50,25 @@ test("Takes components in the document and produces component ids like the REST 
 test("Takes component sets in the document and produces component set ids like the REST api in the result", async () => {
   const componentDefaults = {
     documentationLinks: [],
-    description: "",
+    description: "A rounded button with a few variants",
     remote: false
   };
   const sourceComponent = {
     ...defaultLayers.FRAME,
     type: "COMPONENT",
-    name: "My Nice Component",
-    key: "baby",
+    name: "type=primary, size=large",
+    key: "6848d756da66e55b42f79c0728e351ad",
     id: "123:456",
+    parent: null as SceneNode | null,
     backgrounds: [{ type: "IMAGE", imageHash: "A", scaleMode: "FILL" }],
-    ...componentDefaults
+    ...componentDefaults,
+    description: "The primary large button"
   };
 
   const sourceInstance = {
     ...defaultLayers.FRAME,
     type: "INSTANCE",
+    name: "Checkout Button",
     mainComponent: sourceComponent,
     children: []
   };
@@ -72,23 +76,23 @@ test("Takes component sets in the document and produces component set ids like t
   const sourceComponentSet = {
     ...defaultLayers.FRAME,
     type: "COMPONENT_SET",
-    name: "My Nice Component Set",
-    key: "baby-set",
+    name: "Rounded Button",
+    key: "83218ac34c1834c26781fe4bde918ee4",
     id: "123:789",
-    children: [sourceInstance as any as InstanceNode],
+    // This isn't used currently, but just making sure we simulate the real thing
+    children: [sourceComponent as any as ComponentNode],
     ...componentDefaults
   };
 
-  // @ts-ignore
   sourceComponent["parent"] = sourceComponentSet as any as ComponentSetNode;
 
-  const d = await dump([sourceInstance as any as ComponentSetNode]);
+  const d = await dump([sourceInstance as any as InstanceNode]);
 
   const components: F.ComponentMap = {
     "123:456": {
-      key: "baby",
-      name: "My Nice Component",
-      description: "",
+      key: "6848d756da66e55b42f79c0728e351ad",
+      name: "type=primary, size=large",
+      description: "The primary large button",
       remote: false,
       documentationLinks: [],
       componentSetId: "123:789"
@@ -96,9 +100,9 @@ test("Takes component sets in the document and produces component set ids like t
   };
   const componentSets: F.ComponentSetMap = {
     "123:789": {
-      key: "baby-set",
-      name: "My Nice Component Set",
-      description: "",
+      key: "83218ac34c1834c26781fe4bde918ee4",
+      name: "Rounded Button",
+      description: "A rounded button with a few variants",
       remote: false
     }
   };
