@@ -16,7 +16,6 @@ const defaultLayers: {
   RECTANGLE: {
     id: "_",
     name: "Rectangle",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -88,7 +87,6 @@ const defaultLayers: {
   LINE: {
     id: "_",
     name: "Line",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -150,7 +148,6 @@ const defaultLayers: {
   ELLIPSE: {
     id: "_",
     name: "Ellipse",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -219,7 +216,6 @@ const defaultLayers: {
   POLYGON: {
     id: "_",
     name: "Polygon",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -284,7 +280,6 @@ const defaultLayers: {
   STAR: {
     id: "_",
     name: "Star",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -350,7 +345,6 @@ const defaultLayers: {
   VECTOR: {
     id: "_",
     name: "Vector",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -411,7 +405,6 @@ const defaultLayers: {
   TEXT: {
     id: "_",
     name: "Text",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -492,7 +485,6 @@ const defaultLayers: {
   FRAME: {
     id: "_",
     name: "Frame",
-    removed: false,
     visible: true,
     locked: false,
     componentPropertyReferences: null,
@@ -603,7 +595,6 @@ const defaultLayers: {
   PAGE: {
     id: "_",
     name: "Page",
-    removed: false,
     children: [],
     guides: [],
     selection: [],

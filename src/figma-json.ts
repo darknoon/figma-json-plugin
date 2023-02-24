@@ -638,7 +638,8 @@ export interface BaseNodeMixin extends PluginDataMixin {
   // CONVERSION: important to not have parent because we have nesting
   // readonly parent: (BaseNode & ChildrenMixin) | null;
   name: string; // Note: setting this also sets `autoRename` to false on TextNodes
-  readonly removed: boolean;
+  // CONVERSION: excluding removed because it doesn't provide value
+  // readonly removed: boolean;
   // TODO: Add relaunch data?
 }
 
@@ -681,7 +682,8 @@ export interface ConstraintMixin {
 export interface LayoutMixin {
   // CONVERSION: should we use absoluteBounds?
   // readonly absoluteTransform: Transform;
-  relativeTransform: Transform;
+  // CONVERSION: relativeTransform's presence depends on the `geometry` option
+  relativeTransform?: Transform;
   x: number;
   y: number;
   rotation: number; // In degrees
@@ -726,7 +728,8 @@ export interface MinimalStrokesMixin {
   strokeJoin: StrokeJoin | Mixed;
   strokeAlign: "CENTER" | "INSIDE" | "OUTSIDE";
   dashPattern: ReadonlyArray<number>;
-  strokeGeometry: VectorPaths;
+  // CONVERSION: strokeGeometry's presence depends on the `geometry` option
+  strokeGeometry?: VectorPaths;
 }
 
 export interface IndividualStrokesMixin {
@@ -744,7 +747,8 @@ export interface MinimalFillsMixin {
 export interface GeometryMixin extends MinimalStrokesMixin, MinimalFillsMixin {
   strokeCap: StrokeCap | Mixed;
   strokeMiterLimit: number;
-  fillGeometry: VectorPaths;
+  // CONVERSION: fillGeometry's presence depends on the `geometry` option
+  fillGeometry?: VectorPaths;
 }
 
 export interface CornerMixin {
@@ -852,7 +856,8 @@ export interface OpaqueNodeMixin
     SceneNodeMixin,
     ExportMixin {
   // readonly absoluteTransform: Transform;
-  relativeTransform: Transform;
+  // CONVERSION: relativeTransform's presence depends on the `geometry` option
+  relativeTransform?: Transform;
   x: number;
   y: number;
   readonly width: number;
