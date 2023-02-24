@@ -50,15 +50,25 @@ export interface ComponentSetInfo {
   documentationLinks: ReadonlyArray<DocumentationLink>;
 }
 
+export interface StyleInfo {
+  key: string;
+  name: string;
+  styleType: StyleType;
+  remote: boolean;
+  description: string;
+}
+
 export type ComponentMap = Record<string, ComponentInfo>;
 export type ComponentSetMap = Record<string, ComponentSetInfo>;
 export type ImageMap = { [hash: string]: Uint8Array };
+export type StyleMap = Record<string, StyleInfo>;
 
 export interface DumpedFigma {
   objects: SceneNode[];
   components: ComponentMap;
   componentSets: ComponentSetMap;
   images: ImageMap;
+  styles: StyleMap;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

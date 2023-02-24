@@ -76,13 +76,15 @@ interface Options {
   skipInvisibleNodes: boolean;
   images: boolean;
   geometry: "none" | "paths";
+  styles: boolean;
 }
 
 const defaultOptions: Options = {
   skipInvisibleNodes: true,
   // TODO: Investigate why reading images makes the plugin crash. Otherwise we could have this be true by default.
   images: false,
-  geometry: "none"
+  geometry: "none",
+  styles: false
 };
 
 function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
@@ -118,6 +120,7 @@ class DumpContext {
   imageHashes = new Set<string>();
   components: F.ComponentMap = {};
   componentSets: F.ComponentSetMap = {};
+  styles: F.StyleMap = {};
 }
 
 function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
@@ -125,9 +128,27 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
     const v = n[k];
     if (k === "imageHash" && typeof v === "string") {
       ctx.imageHashes.add(v);
-    }
-    // If this is a reference to a mainComponent, we want to instead add the componentId
-    if (k === "mainComponent" && v) {
+    } else if (
+      k.endsWith("StyleId") &&
+      typeof v === "string" &&
+      v.length > 0 &&
+      ctx.options.styles
+    ) {
+      const style = figma.getStyleById(v);
+
+      if (style) {
+        ctx.styles[style.id] = {
+          key: style.key,
+          name: style.name,
+          styleType: style.type,
+          remote: style.remote,
+          description: style.description
+        };
+      } else {
+        console.warn(`Couldn't find style with id ${v}.`);
+      }
+    } else if (k === "mainComponent" && v) {
+      // If this is a reference to a mainComponent, we want to instead add the componentId
       // ok v should be a component
       const component = v as ComponentNode;
       let componentSetId;
@@ -234,12 +255,13 @@ export async function dump(
   // Reset skipInvisibleInstanceChildren to not affect other code.
   restoreFigmaState();
 
-  const { components, componentSets } = ctx;
+  const { components, componentSets, styles } = ctx;
 
   return {
     objects,
     components,
     componentSets,
+    styles,
     images
   };
 }
