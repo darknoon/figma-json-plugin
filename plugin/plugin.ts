@@ -29,19 +29,27 @@ let updateEventsPaused = false;
 figma.ui.onmessage = (pluginMessage: any, props: OnMessageProperties) => {
   const message = pluginMessage as UIToPluginMessage;
   switch (message.type) {
-    case "insert":
+    case "insert": {
       const { data } = message;
       updateEventsPaused = true;
       doInsert(data);
       updateEventsPaused = false;
       break;
-    case "logDefaults":
+    }
+    case "logDefaults": {
       logDefaults();
       break;
-    case "ready":
+    }
+    case "testInsert": {
+      const { data } = message;
+      data.forEach((d) => doInsert(d));
+      break;
+    }
+    case "ready": {
       tellUIAboutStoredText();
       updateUIWithSelection();
       break;
+    }
   }
 };
 
@@ -65,7 +73,8 @@ async function tellUIAboutStoredText() {
     objects: [l],
     components: {},
     componentSets: {},
-    images: {}
+    images: {},
+    styles: {}
   };
   postMessage({
     type: "updateInsertText",

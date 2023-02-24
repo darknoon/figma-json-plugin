@@ -44,7 +44,13 @@ export const readBlacklist = new Set([
 export const writeBlacklist = new Set([
   "id",
   "componentPropertyReferences",
-  "variantProperties"
+  "variantProperties",
+  // readonly
+  "overlayPositionType",
+  "overlayBackground",
+  "overlayBackgroundInteraction",
+  "fontWeight", // readonly; encoded in fontName if not mixed
+  "inferredAutoLayout" // TODO: maybe this belongs in readBlacklist
 ]);
 
 function notUndefined<T>(x: T | undefined): x is T {
@@ -266,13 +272,35 @@ export async function dump(
   };
 }
 
-async function loadFonts(n: F.DumpedFigma): Promise<void> {
+async function loadFonts(n: F.DumpedFigma): Promise<{
+  usedFonts: FontName[];
+  loadedFonts: FontName[];
+  missingFonts: FontName[];
+}> {
   console.log("starting font load...");
   const fontNames = fontsToLoad(n);
   console.log("loading fonts:", fontNames);
 
-  await Promise.all(fontNames.map((f) => figma.loadFontAsync(f)));
+  const usedFonts: FontName[] = [];
+  const loadedFonts: FontName[] = [];
+  const missingFonts: FontName[] = [];
+
+  await Promise.all(
+    fontNames.map(async (fontName) => {
+      usedFonts.push(fontName);
+
+      try {
+        await figma.loadFontAsync(fontName);
+        loadedFonts.push(fontName);
+      } catch (e) {
+        console.log("error loading font:", e);
+        missingFonts.push(fontName);
+      }
+    })
+  );
+
   console.log("done loading fonts.");
+  return { usedFonts, loadedFonts, missingFonts };
 }
 
 // Format is "Family|Style"
@@ -292,29 +320,6 @@ export function decodeFont(f: EncodedFont): FontName {
   }
   const [family, style] = s;
   return { family, style };
-}
-
-export function preflightFonts(
-  dump: F.DumpedFigma,
-  availableFonts: FontName[]
-): {
-  requiredFonts: FontName[];
-  missingFonts: FontName[];
-  usedFonts: FontName[];
-} {
-  const requiredFonts = fontsToLoad(dump);
-  const availableFontsSet = new Set(availableFonts.map(encodeFont));
-  const missingFonts = requiredFonts.filter(
-    (f) => !availableFontsSet.has(encodeFont(f))
-  );
-  const usedFonts = requiredFonts.filter((f) =>
-    availableFontsSet.has(encodeFont(f))
-  );
-  return {
-    requiredFonts,
-    missingFonts,
-    usedFonts
-  };
 }
 
 function resizeOrLog(
@@ -347,7 +352,7 @@ function resizeOrLog(
 export function fontsToLoad(n: F.DumpedFigma): FontName[] {
   // Sets are dumb in JS, can't use FontName because it's an object ref
   // Normalize all fonts to their JSON representation
-  const fonts = new Set<string>();
+  const fonts = new Set<EncodedFont>();
 
   // Recursive function, searches for fontName to add to set
   const addFonts = (json: F.SceneNode) => {
@@ -423,7 +428,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const offset = { x: 0, y: 0 };
   console.log("starting insert.");
 
-  await loadFonts(n);
+  const { missingFonts } = await loadFonts(n);
 
   // Create all images
   console.log("creating images.");
@@ -487,10 +492,20 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokeCap,
           strokeJoin,
           pluginData,
+          layoutMode,
+          itemReverseZIndex,
+          strokesIncludedInLayout,
           ...rest
         } = json;
         const f = factories[json.type]();
         addToParent(f);
+        f.layoutMode = layoutMode;
+        // TODO: Separate out into function?
+        // We can't even set these properties to false if there's no auto layout
+        if (f.layoutMode !== "NONE") {
+          f.itemReverseZIndex = itemReverseZIndex;
+          f.strokesIncludedInLayout = strokesIncludedInLayout;
+        }
         resizeOrLog(f, width, height);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
@@ -553,7 +568,19 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         const f = figma.createText();
         // Need to assign this first, because of font-loading rules :O
         if (fontName !== "__Symbol(figma.mixed)__") {
-          f.fontName = fontName;
+          // Replace missing fonts with Inter
+          if (
+            // TODO: this isn't great
+            missingFonts.some(
+              (m) => m.family === fontName.family && m.style === fontName.style
+            )
+          ) {
+            // TODO: Make sure to match original style
+            // and ensure Inter itself is available
+            f.fontName = { family: "Inter", style: "Regular" };
+          } else {
+            f.fontName = fontName;
+          }
         }
         safeAssign(f, rest);
         applyPluginData(f, pluginData);

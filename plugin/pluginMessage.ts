@@ -15,10 +15,16 @@ export interface LogDefaultsMessage {
   type: "logDefaults";
 }
 
+export interface TestInsertMessage {
+  type: "testInsert";
+  data: F.DumpedFigma[];
+}
+
 export type UIToPluginMessage =
   | ReadyMessage
   | InsertMessage
-  | LogDefaultsMessage;
+  | LogDefaultsMessage
+  | TestInsertMessage;
 
 /// Messages Plugin code sends to UI
 
