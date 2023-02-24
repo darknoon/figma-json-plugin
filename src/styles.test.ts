@@ -170,6 +170,7 @@ test("Doesn't create styles when option is set to false", async () => {
 
 // Helper that extracts a style key from a style id.
 // Necessary because figma-api-stub doesn't create style keys.
+// https://github.com/react-figma/figma-api-stub/issues/61
 function getStyleKey(styleId: string): string {
   const startIndex = styleId.indexOf(":") + 1;
   const endIndex = styleId.lastIndexOf(",");
