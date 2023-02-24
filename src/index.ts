@@ -76,13 +76,15 @@ interface Options {
   skipInvisibleNodes: boolean;
   images: boolean;
   geometry: "none" | "paths";
+  styles: boolean;
 }
 
 const defaultOptions: Options = {
   skipInvisibleNodes: true,
   // TODO: Investigate why reading images makes the plugin crash. Otherwise we could have this be true by default.
   images: false,
-  geometry: "none"
+  geometry: "none",
+  styles: true
 };
 
 function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
@@ -126,12 +128,17 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
     const v = n[k];
     if (k === "imageHash" && typeof v === "string") {
       ctx.imageHashes.add(v);
-    } else if (k.endsWith("StyleId") && typeof v === "string" && v.length > 0) {
+    } else if (
+      k.endsWith("StyleId") &&
+      typeof v === "string" &&
+      v.length > 0 &&
+      ctx.options.styles
+    ) {
       const style = figma.getStyleById(v);
 
-      if (style && style.consumers.length > 0) {
-        // Using the same ID as the Figma REST API
-        ctx.styles[style.consumers[0].node.id] = {
+      if (style) {
+        // This isn't the same id as Figma uses
+        ctx.styles[style.id] = {
           key: style.key,
           name: style.name,
           styleType: style.type,
