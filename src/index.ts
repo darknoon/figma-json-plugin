@@ -137,7 +137,6 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
       const style = figma.getStyleById(v);
 
       if (style) {
-        // This isn't the same id as Figma uses
         ctx.styles[style.id] = {
           key: style.key,
           name: style.name,
@@ -145,6 +144,8 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
           remote: style.remote,
           description: style.description
         };
+      } else {
+        console.warn(`Couldn't find style with id ${v}.`);
       }
     } else if (k === "mainComponent" && v) {
       // If this is a reference to a mainComponent, we want to instead add the componentId
