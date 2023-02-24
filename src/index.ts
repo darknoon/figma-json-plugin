@@ -118,6 +118,7 @@ class DumpContext {
   imageHashes = new Set<string>();
   components: F.ComponentMap = {};
   componentSets: F.ComponentSetMap = {};
+  styles: F.StyleMap = {};
 }
 
 function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
@@ -125,9 +126,21 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
     const v = n[k];
     if (k === "imageHash" && typeof v === "string") {
       ctx.imageHashes.add(v);
-    }
-    // If this is a reference to a mainComponent, we want to instead add the componentId
-    if (k === "mainComponent" && v) {
+    } else if (k.endsWith("StyleId") && typeof v === "string" && v.length > 0) {
+      const style = figma.getStyleById(v);
+
+      if (style && style.consumers.length > 0) {
+        // Using the same ID as the Figma REST API
+        ctx.styles[style.consumers[0].node.id] = {
+          key: style.key,
+          name: style.name,
+          styleType: style.type,
+          remote: style.remote,
+          description: style.description
+        };
+      }
+    } else if (k === "mainComponent" && v) {
+      // If this is a reference to a mainComponent, we want to instead add the componentId
       // ok v should be a component
       const component = v as ComponentNode;
       let componentSetId;
@@ -234,12 +247,13 @@ export async function dump(
   // Reset skipInvisibleInstanceChildren to not affect other code.
   restoreFigmaState();
 
-  const { components, componentSets } = ctx;
+  const { components, componentSets, styles } = ctx;
 
   return {
     objects,
     components,
     componentSets,
+    styles,
     images
   };
 }
