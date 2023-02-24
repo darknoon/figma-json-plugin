@@ -84,7 +84,7 @@ const defaultOptions: Options = {
   // TODO: Investigate why reading images makes the plugin crash. Otherwise we could have this be true by default.
   images: false,
   geometry: "none",
-  styles: true
+  styles: false
 };
 
 function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {

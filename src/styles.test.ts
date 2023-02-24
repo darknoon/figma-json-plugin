@@ -21,7 +21,7 @@ test("Creates a top-level styles object when styles option is true", async () =>
   rectangle.fillStyleId = paintStyle.id;
   rectangle.effectStyleId = effectStyle.id;
 
-  const d = await dump([container]);
+  const d = await dump([container], { styles: true });
 
   const styleMap: F.StyleMap = {
     [paintStyle.id]: {
@@ -64,7 +64,7 @@ test("Doesn't include unused styles", async () => {
   const container = figma.createFrame();
   container.fillStyleId = paintStyle.id;
 
-  const d = await dump([container]);
+  const d = await dump([container], { styles: true });
 
   const styleMap: F.StyleMap = {
     [paintStyle.id]: {
@@ -92,7 +92,7 @@ test("Doesn't include same style multiple times", async () => {
   // Use same style twice within rectangle (fill and stroke).
   rectangle.strokeStyleId = paintStyle.id;
 
-  const d = await dump([container]);
+  const d = await dump([container], { styles: true });
 
   const styleMap: F.StyleMap = {
     [paintStyle.id]: {
@@ -121,7 +121,7 @@ test("Handles multiple styles of same type", async () => {
   container.fillStyleId = paintStyle.id;
   rectangle.fillStyleId = secondPaintStyle.id;
 
-  const d = await dump([container]);
+  const d = await dump([container], { styles: true });
 
   const styleMap: F.StyleMap = {
     [paintStyle.id]: {
@@ -148,7 +148,7 @@ test("Doesn't include mixed styles", async () => {
   // Fake a mixed style using a random Symbol.
   container.fillStyleId = Symbol("fakeMixedValue") as typeof figma.mixed;
 
-  const d = await dump([container]);
+  const d = await dump([container], { styles: true });
 
   expect(d.styles).toEqual({});
 });
