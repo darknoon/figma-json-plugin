@@ -272,18 +272,44 @@ export async function dump(
   };
 }
 
-async function loadFonts(n: F.DumpedFigma): Promise<{
-  usedFonts: FontName[];
-  loadedFonts: FontName[];
-  missingFonts: FontName[];
+export function getReplacementFont(missingFont: F.FontName): F.FontName {
+  const family = "Inter";
+
+  switch (missingFont.style) {
+    case "Thin":
+      return { family, style: "Thin" };
+    case "Extra Light":
+      return { family, style: "Extra Light" };
+    case "Light":
+      return { family, style: "Light" };
+    case "Medium":
+      return { family, style: "Medium" };
+    case "Semi Bold":
+      return { family, style: "Semi Bold" };
+    case "Bold":
+      return { family, style: "Bold" };
+    case "Extra Bold":
+      return { family, style: "Extra Bold" };
+    case "Black":
+      return { family, style: "Black" };
+    default: {
+      return { family, style: "Regular" };
+    }
+  }
+}
+
+export async function loadFonts(n: F.DumpedFigma): Promise<{
+  usedFonts: F.FontName[];
+  loadedFonts: F.FontName[];
+  missingFonts: F.FontName[];
 }> {
   console.log("starting font load...");
   const fontNames = fontsToLoad(n);
   console.log("loading fonts:", fontNames);
 
-  const usedFonts: FontName[] = [];
-  const loadedFonts: FontName[] = [];
-  const missingFonts: FontName[] = [];
+  const usedFonts: F.FontName[] = [];
+  const loadedFonts: F.FontName[] = [];
+  const missingFonts: F.FontName[] = [];
 
   await Promise.all(
     fontNames.map(async (fontName) => {
@@ -428,7 +454,10 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const offset = { x: 0, y: 0 };
   console.log("starting insert.");
 
-  const { missingFonts } = await loadFonts(n);
+  // TODO: UNCOMMENT
+  // const { missingFonts } = await loadFonts(n);
+  // TODO: Remove this
+  const missingFonts: F.FontName[] = [];
 
   // Create all images
   console.log("creating images.");
@@ -570,14 +599,11 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         if (fontName !== "__Symbol(figma.mixed)__") {
           // Replace missing fonts with Inter
           if (
-            // TODO: this isn't great
-            missingFonts.some(
+            missingFonts.find(
               (m) => m.family === fontName.family && m.style === fontName.style
             )
           ) {
-            // TODO: Make sure to match original style
-            // and ensure Inter itself is available
-            f.fontName = { family: "Inter", style: "Regular" };
+            f.fontName = getReplacementFont(fontName);
           } else {
             f.fontName = fontName;
           }
