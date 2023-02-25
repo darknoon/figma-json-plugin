@@ -7,6 +7,7 @@ import { dump, fontsToLoad, loadFonts, getReplacementFont } from ".";
 // TODO: When to use FontName vs F.FontName?
 // TODO: Use describe?
 // TODO: Move tests to folder?
+// TODO: TEST WE'RE NOT ALWAYS USING INTER
 
 const customFontName = {
   family: "My Custom Font",

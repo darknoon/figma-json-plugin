@@ -53,6 +53,18 @@ export const writeBlacklist = new Set([
   "inferredAutoLayout" // TODO: maybe this belongs in readBlacklist
 ]);
 
+const replacementFonts: F.FontName[] = [
+  { family: "Inter", style: "Regular" }, // default
+  { family: "Inter", style: "Thin" },
+  { family: "Inter", style: "Extra Light" },
+  { family: "Inter", style: "Light" },
+  { family: "Inter", style: "Medium" },
+  { family: "Inter", style: "Semi Bold" },
+  { family: "Inter", style: "Bold" },
+  { family: "Inter", style: "Extra Bold" },
+  { family: "Inter", style: "Black" }
+];
+
 function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
 }
@@ -272,41 +284,12 @@ export async function dump(
   };
 }
 
-export function getReplacementFont(missingFont: F.FontName): F.FontName {
-  const family = "Inter";
-
-  switch (missingFont.style) {
-    case "Thin":
-      return { family, style: "Thin" };
-    case "Extra Light":
-      return { family, style: "Extra Light" };
-    case "Light":
-      return { family, style: "Light" };
-    case "Medium":
-      return { family, style: "Medium" };
-    case "Semi Bold":
-      return { family, style: "Semi Bold" };
-    case "Bold":
-      return { family, style: "Bold" };
-    case "Extra Bold":
-      return { family, style: "Extra Bold" };
-    case "Black":
-      return { family, style: "Black" };
-    default: {
-      return { family, style: "Regular" };
-    }
-  }
-}
-
-export async function loadFonts(n: F.DumpedFigma): Promise<{
+// TODO: Used fonts won't be accurate with replacement fonts
+export async function loadFonts(fontNames: F.FontName[]): Promise<{
   usedFonts: F.FontName[];
   loadedFonts: F.FontName[];
   missingFonts: F.FontName[];
 }> {
-  console.log("starting font load...");
-  const fontNames = fontsToLoad(n);
-  console.log("loading fonts:", fontNames);
-
   const usedFonts: F.FontName[] = [];
   const loadedFonts: F.FontName[] = [];
   const missingFonts: F.FontName[] = [];
@@ -346,6 +329,46 @@ export function decodeFont(f: EncodedFont): FontName {
   }
   const [family, style] = s;
   return { family, style };
+}
+
+async function applyFontName(
+  n: TextNode,
+  fontName: F.TextNode["fontName"],
+  missingFonts: F.FontName[],
+  replacementFonts: F.FontName[]
+) {
+  if (fontName === "__Symbol(figma.mixed)__") {
+    return;
+  }
+
+  if (
+    !missingFonts.find(
+      (m) => m.family === fontName.family && m.style === fontName.style
+    )
+  ) {
+    n.fontName = fontName;
+    return;
+  }
+
+  // Assumes missing font is not a replacement font.
+  const replacementFont = getReplacementFont(fontName, replacementFonts);
+  // Could fail if the replacement font is also missing.
+  n.fontName = replacementFont;
+}
+
+export function getReplacementFont(
+  missingFont: F.FontName,
+  replacementFonts: F.FontName[]
+): F.FontName {
+  const replacement = replacementFonts.find(
+    (f) => f.style === missingFont.style
+  );
+
+  if (replacement) {
+    return replacement;
+  }
+
+  return replacementFonts[0];
 }
 
 function resizeOrLog(
@@ -454,10 +477,8 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const offset = { x: 0, y: 0 };
   console.log("starting insert.");
 
-  // TODO: UNCOMMENT
-  // const { missingFonts } = await loadFonts(n);
-  // TODO: Remove this
-  const missingFonts: F.FontName[] = [];
+  const fontNames = [...new Set([...fontsToLoad(n), ...replacementFonts])];
+  const { missingFonts } = await loadFonts(fontNames);
 
   // Create all images
   console.log("creating images.");
@@ -596,18 +617,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         const { type, width, height, fontName, pluginData, ...rest } = json;
         const f = figma.createText();
         // Need to assign this first, because of font-loading rules :O
-        if (fontName !== "__Symbol(figma.mixed)__") {
-          // Replace missing fonts with Inter
-          if (
-            missingFonts.find(
-              (m) => m.family === fontName.family && m.style === fontName.style
-            )
-          ) {
-            f.fontName = getReplacementFont(fontName);
-          } else {
-            f.fontName = fontName;
-          }
-        }
+        applyFontName(f, fontName, missingFonts, replacementFonts);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
         resizeOrLog(f, width, height);
