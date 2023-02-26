@@ -114,7 +114,7 @@ async function logDefaults() {
 async function updateUIWithSelection() {
   try {
     // Dump document selection to JSON
-    const opt = { images: true };
+    const opt = { images: true, styles: true };
     console.log("dumping...", opt);
     const data = await dump(figma.currentPage.selection, opt);
     postMessage({ type: "update", data });

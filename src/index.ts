@@ -50,7 +50,8 @@ export const writeBlacklist = new Set([
   "overlayBackground",
   "overlayBackgroundInteraction",
   "fontWeight", // readonly; encoded in fontName if not mixed
-  "inferredAutoLayout" // TODO: maybe this belongs in readBlacklist
+  "inferredAutoLayout", // TODO: maybe this belongs in readBlacklist
+  "componentId" // todo feels a bit jank
 ]);
 
 export const fallbackFonts: F.FontName[] = [
@@ -325,27 +326,39 @@ export async function loadFonts(
   return { availableFonts, missingFonts, fontReplacements };
 }
 
-async function loadComponents(components: F.ComponentMap) {
-  const usedComponents: F.ComponentInfo[] = [];
-  const loadedComponents: F.ComponentInfo[] = [];
-  const missingComponents: F.ComponentInfo[] = [];
+async function loadComponents(requestedComponents: F.ComponentMap) {
+  const availableComponents: Record<string, ComponentNode> = {};
 
   await Promise.all(
-    Object.values(components).map(async (component) => {
-      usedComponents.push(component);
-
+    Object.entries(requestedComponents).map(async ([id, requested]) => {
       try {
-        await figma.importComponentByKeyAsync(component.key);
-        loadedComponents.push(component);
+        const component = await figma.importComponentByKeyAsync(requested.key);
+        availableComponents[id] = component;
       } catch (e) {
-        console.log("error loading component:", e);
-        missingComponents.push(component);
+        const node = figma.getNodeById(id);
+        if (node && node.type === "COMPONENT") {
+          availableComponents[id] = node as ComponentNode;
+        } else {
+          console.log("error loading component:", e);
+        }
       }
     })
   );
 
-  console.log("done loading components.");
-  return { usedComponents, loadedComponents, missingComponents };
+  return { availableComponents };
+}
+
+async function loadStyles(requestedStyles: F.StyleMap) {
+  await Promise.all(
+    Object.entries(requestedStyles).map(async ([id, requested]) => {
+      try {
+        await figma.importStyleByKeyAsync(requested.key);
+      } catch (e) {
+        // TODO: Explain why we don't need to use getNodeById
+        console.log("error loading style:", e);
+      }
+    })
+  );
 }
 
 // Format is "Family|Style"
@@ -490,6 +503,66 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
   }
 }
 
+function hasKey<O extends object>(obj: O, key: keyof any): key is keyof O {
+  return key in obj;
+}
+
+function transferOverrides(
+  originalNode: F.SceneNode,
+  newNode: SceneNode,
+  overrides: F.InstanceNode["overrides"]
+) {
+  // TODO: Keep track of fulfilled overrides
+
+  if (originalNode.type !== newNode.type || overrides.length === 0) {
+    return;
+  }
+
+  console.log("WOOEEEH");
+
+  const override = overrides.find((o) => o.id === originalNode.id);
+
+  if (override) {
+    for (const overridenField of override.overriddenFields) {
+      // TODO: Verify that this does anything
+      if (!(overridenField in originalNode) || !(overridenField in newNode)) {
+        continue;
+      }
+
+      const field = overridenField as keyof typeof originalNode;
+      const originalValue = originalNode[field];
+
+      if (!originalValue) {
+        continue;
+      }
+
+      // TODO: This gets kinda hairy...
+
+      // TODO: Hackin
+      if (field === "width" || field === "height") {
+        continue;
+      }
+
+      safeAssign(newNode, { [field]: originalValue });
+    }
+  }
+
+  if (!("children" in originalNode) || !("children" in newNode)) {
+    return;
+  }
+
+  for (let i = 0; i < originalNode.children.length; i++) {
+    const originalChild = originalNode.children[i];
+    const newChild = newNode.children[i];
+
+    if (!originalChild || !newChild) {
+      continue;
+    }
+
+    transferOverrides(originalChild, newChild, overrides);
+  }
+}
+
 function applyPluginData(
   n: BaseNodeMixin,
   pluginData: F.SceneNode["pluginData"]
@@ -504,9 +577,11 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const offset = { x: 0, y: 0 };
   console.log("starting insert.");
 
-  const { fontReplacements } = await loadFonts(fontsToLoad(n), fallbackFonts);
-
-  // const { missingComponents } = await loadComponents(n.components);
+  const [{ fontReplacements }, { availableComponents }] = await Promise.all([
+    loadFonts(fontsToLoad(n), fallbackFonts),
+    loadComponents(n.components),
+    loadStyles(n.styles)
+  ]);
 
   // for (const component of Object.values(n.components)) {
   // }
@@ -549,7 +624,17 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       TEXT: () => figma.createText(),
       FRAME: () => figma.createFrame(),
       // Is this a component instance or original component???
-      COMPONENT: () => figma.createComponent()
+      COMPONENT: () => figma.createComponent(),
+      INSTANCE: (
+        componentId: F.InstanceNode["componentId"],
+        availableComponents: Record<string, ComponentNode>
+      ) => {
+        const component = availableComponents[componentId];
+        if (!component) {
+          throw new Error("Couldn't find component");
+        }
+        return component.createInstance();
+      }
 
       // Not sceneNodes…
       // createPage(): PageNode;
@@ -565,9 +650,46 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
 
     let n;
     switch (json.type) {
-      case "INSTANCE": {
+      case "INSTANCE":
+        const {
+          type,
+          children = [], // only to satisfy safeAssign, we can't control children in instances
+          componentId,
+          layoutMode,
+          itemReverseZIndex,
+          strokesIncludedInLayout,
+          width,
+          height,
+          pluginData,
+          overflowDirection, // prop cannot be overridden in an instance
+          overrides, // so should that be write blacklist?
+          isExposedInstance, // only applies when instance is in a component/component set TODO
+          ...rest
+        } = json;
+        let f: InstanceNode;
+
+        try {
+          f = factories[type](componentId, availableComponents);
+        } catch {
+          console.error("blablaa");
+          break;
+        }
+
+        // TODO: Why is this needed?
+        addToParent(f);
+        // TODO: Plugin data, safeassign etc.?
+        // TODO: Separate out into function?
+        // We can't even set these properties to false if there's no auto layout
+        f.layoutMode = layoutMode;
+        if (layoutMode !== "NONE") {
+          f.itemReverseZIndex = itemReverseZIndex;
+          f.strokesIncludedInLayout = strokesIncludedInLayout;
+        }
+        resizeOrLog(f, width, height);
+        safeAssign(f, rest);
+        applyPluginData(f, pluginData);
+        transferOverrides(json, f, overrides);
         break;
-      }
       // Handle types with children
       case "FRAME":
       case "COMPONENT": {
@@ -576,6 +698,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           children = [],
           width,
           height,
+          // Why did we remove these?
           strokeCap,
           strokeJoin,
           pluginData,
@@ -584,12 +707,13 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokesIncludedInLayout,
           ...rest
         } = json;
+
         const f = factories[json.type]();
         addToParent(f);
-        f.layoutMode = layoutMode;
         // TODO: Separate out into function?
         // We can't even set these properties to false if there's no auto layout
-        if (f.layoutMode !== "NONE") {
+        f.layoutMode = layoutMode;
+        if (layoutMode !== "NONE") {
           f.itemReverseZIndex = itemReverseZIndex;
           f.strokesIncludedInLayout = strokesIncludedInLayout;
         }
