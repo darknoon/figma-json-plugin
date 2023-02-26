@@ -54,7 +54,7 @@ export const writeBlacklist = new Set([
 ]);
 
 const replacementFonts: F.FontName[] = [
-  { family: "Inter", style: "Regular" }, // default
+  { family: "Inter", style: "Regular" }, // default style
   { family: "Inter", style: "Thin" },
   { family: "Inter", style: "Extra Light" },
   { family: "Inter", style: "Light" },
@@ -284,32 +284,73 @@ export async function dump(
   };
 }
 
-// TODO: Used fonts won't be accurate with replacement fonts
-export async function loadFonts(fontNames: F.FontName[]): Promise<{
-  usedFonts: F.FontName[];
-  loadedFonts: F.FontName[];
-  missingFonts: F.FontName[];
+type MissingFonts = {
+  fontName: F.FontName;
+  replacement: F.FontName;
+}[];
+
+export async function loadFonts(
+  fontNames: F.FontName[],
+  replacementFonts: F.FontName[]
+): Promise<{
+  missingFonts: MissingFonts;
 }> {
-  const usedFonts: F.FontName[] = [];
-  const loadedFonts: F.FontName[] = [];
-  const missingFonts: F.FontName[] = [];
+  const missingFonts: MissingFonts = [];
+
+  const loadFontPromises = fontNames.map(async (fontName) => {
+    try {
+      await figma.loadFontAsync(fontName);
+    } catch (e) {
+      console.warn(`Unable to load font: ${encodeFont(fontName)}`);
+      const replacement = getReplacementFont(fontName, replacementFonts);
+
+      console.log(`Trying replacement font: ${encodeFont(replacement)}`);
+      try {
+        await figma.loadFontAsync(replacement);
+        console.log(`Loaded replacement font: ${encodeFont(replacement)}`);
+        missingFonts.push({
+          fontName,
+          replacement
+        });
+      } catch (e) {
+        console.warn(
+          `Unable to load replacement font: ${encodeFont(replacement)}`
+        );
+        missingFonts.push({
+          fontName,
+          replacement: replacementFonts[0]
+        });
+      }
+    }
+  });
+
+  await Promise.all(loadFontPromises);
+
+  console.log("done loading fonts.");
+  return { missingFonts };
+}
+
+async function loadComponents(components: F.ComponentMap) {
+  const usedComponents: F.ComponentInfo[] = [];
+  const loadedComponents: F.ComponentInfo[] = [];
+  const missingComponents: F.ComponentInfo[] = [];
 
   await Promise.all(
-    fontNames.map(async (fontName) => {
-      usedFonts.push(fontName);
+    Object.values(components).map(async (component) => {
+      usedComponents.push(component);
 
       try {
-        await figma.loadFontAsync(fontName);
-        loadedFonts.push(fontName);
+        await figma.importComponentByKeyAsync(component.key);
+        loadedComponents.push(component);
       } catch (e) {
-        console.log("error loading font:", e);
-        missingFonts.push(fontName);
+        console.log("error loading component:", e);
+        missingComponents.push(component);
       }
     })
   );
 
-  console.log("done loading fonts.");
-  return { usedFonts, loadedFonts, missingFonts };
+  console.log("done loading components.");
+  return { usedComponents, loadedComponents, missingComponents };
 }
 
 // Format is "Family|Style"
@@ -334,30 +375,28 @@ export function decodeFont(f: EncodedFont): FontName {
 async function applyFontName(
   n: TextNode,
   fontName: F.TextNode["fontName"],
-  missingFonts: F.FontName[],
-  replacementFonts: F.FontName[]
+  missingFonts: MissingFonts
 ) {
   if (fontName === "__Symbol(figma.mixed)__") {
     return;
   }
 
-  if (
-    !missingFonts.find(
-      (m) => m.family === fontName.family && m.style === fontName.style
-    )
-  ) {
-    n.fontName = fontName;
+  const fontReplacement = missingFonts.find(
+    (m) =>
+      m.fontName.family === fontName.family &&
+      m.fontName.style === fontName.style
+  );
+
+  if (fontReplacement) {
+    n.fontName = fontReplacement.replacement;
     return;
   }
 
-  // Assumes missing font is not a replacement font.
-  const replacementFont = getReplacementFont(fontName, replacementFonts);
-  // Could fail if the replacement font is also missing.
-  n.fontName = replacementFont;
+  n.fontName = fontName;
 }
 
 export function getReplacementFont(
-  missingFont: F.FontName,
+  missingFont: FontName,
   replacementFonts: F.FontName[]
 ): F.FontName {
   const replacement = replacementFonts.find(
@@ -477,8 +516,18 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const offset = { x: 0, y: 0 };
   console.log("starting insert.");
 
-  const fontNames = [...new Set([...fontsToLoad(n), ...replacementFonts])];
-  const { missingFonts } = await loadFonts(fontNames);
+  const { missingFonts } = await loadFonts(fontsToLoad(n), replacementFonts);
+
+  // const { missingComponents } = await loadComponents(n.components);
+
+  // SO after loading fonts just get replacements
+
+  // for (const component of Object.values(n.components)) {
+  // }
+
+  // I really don't like the way we do replacement fonts here
+  // TODO: For instances also be sure to apply component props etc.
+  // TODO: Separate reading and inserting at some point?
 
   // Create all images
   console.log("creating images.");
@@ -498,6 +547,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   console.log("updating figma based on new hashes.");
   const objects = n.objects.map((n) => updateImageHashes(n, hashUpdates));
 
+  console.log("YADAYIE");
   console.log("inserting.");
   const insertSceneNode = (
     json: F.SceneNode,
@@ -531,6 +581,10 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
 
     let n;
     switch (json.type) {
+      case "INSTANCE": {
+        console.log("HOI");
+        break;
+      }
       // Handle types with children
       case "FRAME":
       case "COMPONENT": {
@@ -617,7 +671,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         const { type, width, height, fontName, pluginData, ...rest } = json;
         const f = figma.createText();
         // Need to assign this first, because of font-loading rules :O
-        applyFontName(f, fontName, missingFonts, replacementFonts);
+        applyFontName(f, fontName, missingFonts);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
         resizeOrLog(f, width, height);
