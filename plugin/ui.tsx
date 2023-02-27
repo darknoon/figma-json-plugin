@@ -19,9 +19,6 @@ interface UIState {
   recentInsertText?: string;
 }
 
-// CENTER is no longer a supported value for layoutAlign
-// Make sure to read styles properly
-
 console.log("Starting plugin");
 // declare global onmessage = store.update;
 

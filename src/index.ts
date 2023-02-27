@@ -629,7 +629,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       case "INSTANCE":
         const {
           type,
-          children = [], // satisfying safeAssign; we don't control an instance's children
+          children = [], // satisfying safeAssign
           width,
           height,
           pluginData,
@@ -638,7 +638,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokesIncludedInLayout,
           componentId,
           overflowDirection, // cannot be overridden in an instance
-          isExposedInstance, // TODO: only applies when instance is in component/component set
+          isExposedInstance, // TODO: applies when instance is in component/component set
           ...rest
         } = json;
 
