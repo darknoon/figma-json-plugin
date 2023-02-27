@@ -21,9 +21,9 @@ beforeEach(() => {
     return new Promise<void>((resolve, reject) => {
       if (font.family === notInstalledFontFamily) {
         reject("Font not found");
+      } else {
+        resolve();
       }
-
-      resolve();
     });
   });
 
