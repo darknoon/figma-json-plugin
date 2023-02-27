@@ -112,12 +112,15 @@ class UI extends React.Component {
     }
   };
 
+  // Usage:
+  // 1. Add any figma-json files you want to insert to the plugin folder
+  // 2. Import them: e.g. import * as test1 from "./test1.json";
+  // 3. Add them to the array below: [test1, test2, ...]
   insertTestCases = () => {
     parent.postMessage(
       {
         pluginMessage: {
           type: "insertTestCases",
-          // Add your own, local figma-json files here.
           data: []
         }
       },
