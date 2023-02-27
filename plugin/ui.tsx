@@ -126,7 +126,7 @@ class UI extends React.Component {
       {
         pluginMessage: {
           type: "insertTestCases",
-          // Add your imported figma-json files here.
+          // Add your own, local figma-json files here.
           data: [test1, test2, test3, test4, test5, test6, test7, test8]
         }
       },
