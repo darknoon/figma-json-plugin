@@ -112,6 +112,22 @@ class UI extends React.Component {
     }
   };
 
+  // Usage:
+  // 1. Add any figma-json files you want to insert to the plugin folder
+  // 2. Import them: e.g. import * as test1 from "./test1.json";
+  // 3. Add them to the array below: [test1, test2, ...]
+  insertTestCases = () => {
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: "insertTestCases",
+          data: []
+        }
+      },
+      "*"
+    );
+  };
+
   onInsert = (e: React.MouseEvent) => {
     console.log("asked to insert");
     this.setState({ showInsert: true });
@@ -146,6 +162,12 @@ class UI extends React.Component {
         >
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
+            <button
+              onClick={this.insertTestCases}
+              style={{ userSelect: "none" }}
+            >
+              Insert test cases
+            </button>
             <button onClick={this.logDefaults} style={{ userSelect: "none" }}>
               Log defaults
             </button>
