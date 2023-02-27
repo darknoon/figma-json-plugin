@@ -3,14 +3,6 @@ import { render } from "react-dom";
 import Toolbar, { InsertButton } from "./toolbar";
 import { PluginToUIMessage } from "./pluginMessage";
 
-import test1 from "./test-insert/test-1.json";
-import test2 from "./test-insert/test-2.json";
-import test3 from "./test-insert/test-3.json";
-import test4 from "./test-insert/test-4.json";
-import test5 from "./test-insert/test-5.json";
-import test6 from "./test-insert/test-6.json";
-import test7 from "./test-insert/test-7.json";
-
 interface UIState {
   dump?: any;
   showInsert: boolean;
@@ -126,7 +118,7 @@ class UI extends React.Component {
         pluginMessage: {
           type: "insertTestCases",
           // Add your own, local figma-json files here.
-          data: [test1, test2, test3, test4, test5, test6, test7]
+          data: []
         }
       },
       "*"
