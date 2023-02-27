@@ -111,18 +111,6 @@ class UI extends React.Component {
     }
   };
 
-  testInsert = () => {
-    parent.postMessage(
-      {
-        pluginMessage: {
-          type: "testInsert",
-          data: [test1, test2, test3, test4, test5, test6, test7]
-        }
-      },
-      "*"
-    );
-  };
-
   doInsert = (json: string) => {
     const data = JSON.parse(json);
     if (typeof data !== "object") {
@@ -133,6 +121,19 @@ class UI extends React.Component {
       parent.postMessage({ pluginMessage: { type: "insert", data } }, "*");
     } finally {
     }
+  };
+
+  insertTestCases = () => {
+    parent.postMessage(
+      {
+        pluginMessage: {
+          type: "insertTestCases",
+          // Add your imported figma-json files here.
+          data: [test1, test2, test3, test4, test5, test6, test7]
+        }
+      },
+      "*"
+    );
   };
 
   onInsert = (e: React.MouseEvent) => {
@@ -169,11 +170,14 @@ class UI extends React.Component {
         >
           <Toolbar>
             <InsertButton onInsert={this.onInsert} />
+            <button
+              onClick={this.insertTestCases}
+              style={{ userSelect: "none" }}
+            >
+              Insert test cases
+            </button>
             <button onClick={this.logDefaults} style={{ userSelect: "none" }}>
               Log defaults
-            </button>
-            <button onClick={this.testInsert} style={{ userSelect: "none" }}>
-              Test insert
             </button>
           </Toolbar>
           <pre style={{ flex: 1, overflowY: "auto" }}>

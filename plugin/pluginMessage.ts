@@ -11,20 +11,20 @@ export interface InsertMessage {
   data: F.DumpedFigma;
 }
 
-export interface LogDefaultsMessage {
-  type: "logDefaults";
+export interface InsertTestCasesMessage {
+  type: "insertTestCases";
+  data: F.DumpedFigma[];
 }
 
-export interface TestInsertMessage {
-  type: "testInsert";
-  data: F.DumpedFigma[];
+export interface LogDefaultsMessage {
+  type: "logDefaults";
 }
 
 export type UIToPluginMessage =
   | ReadyMessage
   | InsertMessage
-  | LogDefaultsMessage
-  | TestInsertMessage;
+  | InsertTestCasesMessage
+  | LogDefaultsMessage;
 
 /// Messages Plugin code sends to UI
 

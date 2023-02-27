@@ -36,13 +36,13 @@ figma.ui.onmessage = (pluginMessage: any, props: OnMessageProperties) => {
       updateEventsPaused = false;
       break;
     }
-    case "logDefaults": {
-      logDefaults();
-      break;
-    }
-    case "testInsert": {
+    case "insertTestCases": {
       const { data } = message;
       data.forEach((d) => doInsert(d));
+      break;
+    }
+    case "logDefaults": {
+      logDefaults();
       break;
     }
     case "ready": {

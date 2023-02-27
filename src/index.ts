@@ -49,9 +49,12 @@ export const writeBlacklist = new Set([
   "overlayPositionType",
   "overlayBackground",
   "overlayBackgroundInteraction",
-  "fontWeight", // readonly; encoded in fontName if not mixed
-  "inferredAutoLayout", // TODO: maybe this belongs in readBlacklist
-  "componentId" // todo feels a bit jank
+  "fontWeight",
+  "overrides",
+  "componentProperties",
+  // Not part of the Figma Plugin API
+  "inferredAutoLayout", // TODO: could add to readBlacklist
+  "componentId"
 ]);
 
 export const fallbackFonts: F.FontName[] = [
@@ -285,12 +288,16 @@ export async function dump(
   };
 }
 
+// Loads fonts and returns the available fonts/missing fonts
+// as well as what fonts to replace the missing fonts with.
 export async function loadFonts(
   requestedFonts: F.FontName[],
   fallbackFonts: F.FontName[]
 ): Promise<{
   availableFonts: F.FontName[];
   missingFonts: F.FontName[];
+  // It's slightly awkward to have a map of encoded fonts
+  // but it's a better DX than an array of font names.
   fontReplacements: Record<EncodedFont, EncodedFont>;
 }> {
   const availableFonts: F.FontName[] = [];
@@ -326,6 +333,11 @@ export async function loadFonts(
   return { availableFonts, missingFonts, fontReplacements };
 }
 
+// Loads components and returns the available components.
+// We don't care about missing components (for now) because
+// there's not much we can do; we'd have to find the most similar
+// component and use that instead.
+// TODO: Write a test.
 async function loadComponents(requestedComponents: F.ComponentMap) {
   const availableComponents: Record<string, ComponentNode> = {};
 
@@ -335,6 +347,7 @@ async function loadComponents(requestedComponents: F.ComponentMap) {
         const component = await figma.importComponentByKeyAsync(requested.key);
         availableComponents[id] = component;
       } catch (e) {
+        // Check if the component is an unpublished, local component.
         const node = figma.getNodeById(id);
         if (node && node.type === "COMPONENT") {
           availableComponents[id] = node as ComponentNode;
@@ -348,13 +361,20 @@ async function loadComponents(requestedComponents: F.ComponentMap) {
   return { availableComponents };
 }
 
+// Loads styles.
+// Doesn't return the available styles because we don't need it to
+// use the styles. We don't care about missing styles (for now)
+// because every node also stores what it looks like as the
+// result of applying the style.
+// TODO: Write a test.
 async function loadStyles(requestedStyles: F.StyleMap) {
   await Promise.all(
     Object.entries(requestedStyles).map(async ([id, requested]) => {
       try {
         await figma.importStyleByKeyAsync(requested.key);
       } catch (e) {
-        // TODO: Explain why we don't need to use getNodeById
+        // The style could be an unpublished, local style.
+        // We don't care regardless because it's pre-loaded in that case.
         console.log("error loading style:", e);
       }
     })
@@ -503,66 +523,6 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
   }
 }
 
-function hasKey<O extends object>(obj: O, key: keyof any): key is keyof O {
-  return key in obj;
-}
-
-function transferOverrides(
-  originalNode: F.SceneNode,
-  newNode: SceneNode,
-  overrides: F.InstanceNode["overrides"]
-) {
-  // TODO: Keep track of fulfilled overrides
-
-  if (originalNode.type !== newNode.type || overrides.length === 0) {
-    return;
-  }
-
-  console.log("WOOEEEH");
-
-  const override = overrides.find((o) => o.id === originalNode.id);
-
-  if (override) {
-    for (const overridenField of override.overriddenFields) {
-      // TODO: Verify that this does anything
-      if (!(overridenField in originalNode) || !(overridenField in newNode)) {
-        continue;
-      }
-
-      const field = overridenField as keyof typeof originalNode;
-      const originalValue = originalNode[field];
-
-      if (!originalValue) {
-        continue;
-      }
-
-      // TODO: This gets kinda hairy...
-
-      // TODO: Hackin
-      if (field === "width" || field === "height") {
-        continue;
-      }
-
-      safeAssign(newNode, { [field]: originalValue });
-    }
-  }
-
-  if (!("children" in originalNode) || !("children" in newNode)) {
-    return;
-  }
-
-  for (let i = 0; i < originalNode.children.length; i++) {
-    const originalChild = originalNode.children[i];
-    const newChild = newNode.children[i];
-
-    if (!originalChild || !newChild) {
-      continue;
-    }
-
-    transferOverrides(originalChild, newChild, overrides);
-  }
-}
-
 function applyPluginData(
   n: BaseNodeMixin,
   pluginData: F.SceneNode["pluginData"]
@@ -573,21 +533,38 @@ function applyPluginData(
   Object.entries(pluginData).map(([k, v]) => n.setPluginData(k, v));
 }
 
+// Sets layoutMode and several peculiar props that we can
+// only set without erroring if layoutMode isn't "NONE."
+// E.g. we can't even set itemReverseZIndex to false
+// (=disabed) without the right layoutMode.
+// Note that this doesn't set all auto layout values.
+function safeApplyLayoutMode(
+  f: BaseFrameMixin,
+  dict: {
+    layoutMode: F.BaseFrameMixin["layoutMode"];
+    itemReverseZIndex: F.BaseFrameMixin["itemReverseZIndex"];
+    strokesIncludedInLayout: F.BaseFrameMixin["strokesIncludedInLayout"];
+  }
+) {
+  const { layoutMode, itemReverseZIndex, strokesIncludedInLayout } = dict;
+  f.layoutMode = layoutMode;
+
+  if (f.layoutMode !== "NONE") {
+    f.itemReverseZIndex = itemReverseZIndex;
+    f.strokesIncludedInLayout = strokesIncludedInLayout;
+  }
+}
+
 export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const offset = { x: 0, y: 0 };
   console.log("starting insert.");
 
+  // Load all the fonts, components, and styles we need in parallel.
   const [{ fontReplacements }, { availableComponents }] = await Promise.all([
     loadFonts(fontsToLoad(n), fallbackFonts),
     loadComponents(n.components),
     loadStyles(n.styles)
   ]);
-
-  // for (const component of Object.values(n.components)) {
-  // }
-
-  // TODO: For instances also be sure to apply component props etc.
-  // TODO: Separate reading and inserting at some point?
 
   // Create all images
   console.log("creating images.");
@@ -623,7 +600,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       VECTOR: () => figma.createVector(),
       TEXT: () => figma.createText(),
       FRAME: () => figma.createFrame(),
-      // Is this a component instance or original component???
       COMPONENT: () => figma.createComponent(),
       INSTANCE: (
         componentId: F.InstanceNode["componentId"],
@@ -653,42 +629,37 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       case "INSTANCE":
         const {
           type,
-          children = [], // only to satisfy safeAssign, we can't control children in instances
-          componentId,
-          layoutMode,
-          itemReverseZIndex,
-          strokesIncludedInLayout,
+          children = [], // satisfying safeAssign; we don't control an instance's children
           width,
           height,
           pluginData,
-          overflowDirection, // prop cannot be overridden in an instance
-          overrides, // so should that be write blacklist?
-          isExposedInstance, // only applies when instance is in a component/component set TODO
+          layoutMode,
+          itemReverseZIndex,
+          strokesIncludedInLayout,
+          componentId,
+          overflowDirection, // cannot be overridden in an instance
+          isExposedInstance, // TODO: only applies when instance is in component/component set
           ...rest
         } = json;
+
         let f: InstanceNode;
 
         try {
           f = factories[type](componentId, availableComponents);
         } catch {
-          console.error("blablaa");
+          console.error("Couldn't create instance of component", componentId);
           break;
         }
 
-        // TODO: Why is this needed?
         addToParent(f);
-        // TODO: Plugin data, safeassign etc.?
-        // TODO: Separate out into function?
-        // We can't even set these properties to false if there's no auto layout
-        f.layoutMode = layoutMode;
-        if (layoutMode !== "NONE") {
-          f.itemReverseZIndex = itemReverseZIndex;
-          f.strokesIncludedInLayout = strokesIncludedInLayout;
-        }
+        safeApplyLayoutMode(f, {
+          layoutMode,
+          itemReverseZIndex,
+          strokesIncludedInLayout
+        });
         resizeOrLog(f, width, height);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
-        transferOverrides(json, f, overrides);
         break;
       // Handle types with children
       case "FRAME":
@@ -698,7 +669,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           children = [],
           width,
           height,
-          // Why did we remove these?
           strokeCap,
           strokeJoin,
           pluginData,
@@ -710,13 +680,11 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
 
         const f = factories[json.type]();
         addToParent(f);
-        // TODO: Separate out into function?
-        // We can't even set these properties to false if there's no auto layout
-        f.layoutMode = layoutMode;
-        if (layoutMode !== "NONE") {
-          f.itemReverseZIndex = itemReverseZIndex;
-          f.strokesIncludedInLayout = strokesIncludedInLayout;
-        }
+        safeApplyLayoutMode(f, {
+          layoutMode,
+          itemReverseZIndex,
+          strokesIncludedInLayout
+        });
         resizeOrLog(f, width, height);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
