@@ -536,7 +536,7 @@ function applyPluginData(
 // Sets layoutMode and several peculiar props that we can
 // only set without erroring if layoutMode isn't "NONE."
 // E.g. we can't even set itemReverseZIndex to false
-// (=disabed) without the right layoutMode.
+// (=disabled) without the right layoutMode.
 // Note that this doesn't set all auto layout values.
 function safeApplyLayoutMode(
   f: BaseFrameMixin,
