@@ -10,7 +10,6 @@ import test4 from "./test-insert/test-4.json";
 import test5 from "./test-insert/test-5.json";
 import test6 from "./test-insert/test-6.json";
 import test7 from "./test-insert/test-7.json";
-import test8 from "./test-insert/test-8.json";
 
 interface UIState {
   dump?: any;
@@ -127,7 +126,7 @@ class UI extends React.Component {
         pluginMessage: {
           type: "insertTestCases",
           // Add your own, local figma-json files here.
-          data: [test1, test2, test3, test4, test5, test6, test7, test8]
+          data: [test1, test2, test3, test4, test5, test6, test7]
         }
       },
       "*"
