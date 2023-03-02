@@ -54,7 +54,8 @@ export const writeBlacklist = new Set([
   "componentProperties",
   // Not part of the Figma Plugin API
   "inferredAutoLayout", // TODO: could add to readBlacklist
-  "componentId"
+  "componentId",
+  "isAsset"
 ]);
 
 export const fallbackFonts: F.FontName[] = [
@@ -639,6 +640,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           componentId,
           overflowDirection, // cannot be overridden in an instance
           isExposedInstance, // TODO: applies when instance is in component/component set
+          componentProperties,
           ...rest
         } = json;
 
@@ -651,6 +653,12 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           break;
         }
 
+        const properties = Object.fromEntries(
+          Object.entries(componentProperties).map(
+            ([propertyName, { value }]) => [propertyName, value]
+          )
+        );
+        f.setProperties(properties);
         addToParent(f);
         safeApplyLayoutMode(f, {
           layoutMode,
@@ -660,6 +668,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         resizeOrLog(f, width, height);
         safeAssign(f, rest);
         applyPluginData(f, pluginData);
+        n = f;
         break;
       // Handle types with children
       case "FRAME":
