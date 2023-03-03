@@ -469,6 +469,7 @@ export function fontsToLoad(n: F.DumpedFigma): FontName[] {
   const addFonts = (json: F.SceneNode) => {
     switch (json.type) {
       case "COMPONENT":
+      case "INSTANCE":
       case "FRAME":
       case "GROUP":
         const { children = [] } = json;

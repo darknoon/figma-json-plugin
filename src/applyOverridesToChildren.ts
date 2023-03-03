@@ -19,6 +19,13 @@ export function applyOverridesToChildren(
 ) {
   const { overrides } = f;
 
+  if (!overrides) {
+    console.log(`applyOverridesToChildren NO OVERRIDES ${instance.id}`);
+    return;
+  }
+
+  console.log("applyOverridesToChildren", instance, f.overrides);
+
   // Remove overrides that aren't supported
   const supportedOverrides = filterNulls(
     overrides.map(
@@ -33,7 +40,6 @@ export function applyOverridesToChildren(
   const overriddenMap = new Map<string, SupportedProperties[]>(
     supportedOverrides
   );
-
   _recursive(instance, f, overriddenMap);
 }
 
@@ -57,6 +63,7 @@ function _recursive(
         `Instance children type mismatch: ${node.type} !== ${json.type}`
       );
     }
+    console.log(`handling ${node.id} ${json.id}`);
     // We know that these scene nodes correspond, so apply overrides
     _applyOverrides(node, json, overriddenMap);
     // Recurse
@@ -72,7 +79,8 @@ function _applyOverrides(
   overriddenMap: Map<string, SupportedProperties[]>
 ) {
   // Do we have overrides for this node?
-  const overriddenFields = overriddenMap.get(n.id)!;
+  const overriddenFields = overriddenMap.get(j.id);
+  console.log(`overriddenFields for ${n.id}`, overriddenFields);
   if (overriddenFields) {
     for (let property of overriddenFields) {
       console.log(
