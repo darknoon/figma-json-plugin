@@ -147,13 +147,21 @@ class DumpContext {
 
 function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
   return keys.reduce((o, k) => {
-    // TODO: Clean this up
-    const v =
+    let v: any;
+
+    // Get the value of the key.
+    // If the key is componentPropertyDefinitions, we only want to get
+    // the value if the node is a component/component set to avoid errors.
+    if (
       k !== "componentPropertyDefinitions" ||
       (n.type === "COMPONENT" && !n.parent) ||
       n.type === "COMPONENT_SET"
-        ? n[k]
-        : undefined;
+    ) {
+      v = n[k];
+    } else {
+      v = undefined;
+    }
+
     if (k === "imageHash" && typeof v === "string") {
       ctx.imageHashes.add(v);
     } else if (
