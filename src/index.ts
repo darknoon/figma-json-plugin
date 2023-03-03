@@ -1,4 +1,5 @@
 // Copyright 2019 Andrew Pouliot
+import { applyOverridesToChildren } from "./applyOverridesToChildren";
 import * as F from "./figma-json";
 import {
   saveFigmaState as useFigmaState,
@@ -468,6 +469,7 @@ export function fontsToLoad(n: F.DumpedFigma): FontName[] {
   const addFonts = (json: F.SceneNode) => {
     switch (json.type) {
       case "COMPONENT":
+      case "INSTANCE":
       case "FRAME":
       case "GROUP":
         const { children = [] } = json;
@@ -659,6 +661,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           )
         );
         f.setProperties(properties);
+        applyOverridesToChildren(f, json);
         addToParent(f);
         safeApplyLayoutMode(f, {
           layoutMode,
