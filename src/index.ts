@@ -1,4 +1,5 @@
 // Copyright 2019 Andrew Pouliot
+import { conditionalReadBlacklist } from "./readBlacklist";
 import { applyOverridesToChildren } from "./applyOverridesToChildren";
 import * as F from "./figma-json";
 import {
@@ -11,35 +12,6 @@ import updateImageHashes from "./updateImageHashes";
 export * from "./figma-json";
 
 export { default as defaultLayers } from "./figma-default-layers";
-
-// Anything that is readonly on a SceneNode should not be set!
-// See notes in figma-json.ts for more details.
-export const readBlacklist = new Set([
-  "parent",
-  "stuckNodes",
-  "__proto__",
-  "instances",
-  "removed",
-  "exposedInstances",
-  "attachedConnectors",
-  "consumers",
-  "componentPropertyDefinitions",
-  // These are just redundant
-  // TODO: make a setting whether to dump things like this
-  "hasMissingFont",
-  "absoluteTransform",
-  "absoluteRenderBounds",
-  "absoluteBoundingBox",
-  "vectorNetwork",
-  "masterComponent",
-  // Figma exposes this but plugin types don't support them yet
-  "playbackSettings",
-  "listSpacing",
-  "canUpgradeToNativeBidiSupport",
-  // Deprecated but Figma still exposes it
-  "horizontalPadding",
-  "verticalPadding"
-]);
 
 // Things in figmaJSON we are not writing right now
 export const writeBlacklist = new Set([
@@ -96,7 +68,7 @@ function isVisible(n: any) {
   return n.visible && n.opacity > 0.001 && !n.removed;
 }
 
-interface Options {
+export interface Options {
   skipInvisibleNodes: boolean;
   images: boolean;
   geometry: "none" | "paths";
@@ -110,30 +82,6 @@ const defaultOptions: Options = {
   geometry: "none",
   styles: false
 };
-
-function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
-  // Ignore geometry keys if geometry is set to "none"
-  // Copied these keys from the Figma REST API.
-  // "size" represents width/height of elements and is different
-  // from the width/height of the bounding box:
-  // https://www.figma.com/developers/api#frame-props
-  if (options.geometry === "none") {
-    return new Set([
-      ...readBlacklist,
-      "fillGeometry",
-      "strokeGeometry",
-      "size",
-      "relativeTransform"
-    ]);
-  }
-
-  // Never include text outline geometry
-  if ("type" in n && n.type === "TEXT") {
-    return new Set([...readBlacklist, "fillGeometry", "strokeGeometry"]);
-  }
-
-  return readBlacklist;
-}
 
 type AnyObject = { [name: string]: any };
 
