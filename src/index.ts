@@ -162,7 +162,6 @@ class DumpContext {
 function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
   return keys.reduce((o, k) => {
     const v = n[k];
-
     if (k === "imageHash" && typeof v === "string") {
       ctx.imageHashes.add(v);
     } else if (
