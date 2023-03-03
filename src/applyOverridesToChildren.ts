@@ -17,7 +17,7 @@ export function applyOverridesToChildren(
   instance: InstanceNode,
   f: F.InstanceNode
 ) {
-  const { overrides } = instance;
+  const { overrides } = f;
 
   // Remove overrides that aren't supported
   const supportedOverrides = filterNulls(
