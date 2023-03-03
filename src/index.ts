@@ -1,4 +1,5 @@
 // Copyright 2019 Andrew Pouliot
+import { applyOverridesToChildren } from "./applyOverridesToChildren";
 import * as F from "./figma-json";
 import {
   saveFigmaState as useFigmaState,
@@ -659,6 +660,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           )
         );
         f.setProperties(properties);
+        applyOverridesToChildren(f, json.children);
         addToParent(f);
         safeApplyLayoutMode(f, {
           layoutMode,
@@ -790,3 +792,5 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
     })
     .filter(notUndefined);
 }
+
+export type SupportedProperties = "characters" | "opacity";
