@@ -653,12 +653,50 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           break;
         }
 
-        const properties = Object.fromEntries(
-          Object.entries(componentProperties).map(
-            ([propertyName, { value }]) => [propertyName, value]
-          )
-        );
-        f.setProperties(properties);
+        const verifiedProperties: Record<string, string | boolean> = {};
+        const unverifiedProperties: F.ComponentProperties = {};
+
+        // See which component properties are valid.
+        for (const [name, property] of Object.entries(componentProperties)) {
+          if (f.componentProperties[name]) {
+            verifiedProperties[name] = property.value;
+          } else {
+            unverifiedProperties[name] = property;
+          }
+        }
+
+        f.setProperties(verifiedProperties);
+
+        // Treat unrecognized text component properties as potential text overrides.
+        // We do this after setting the verified properties so that we don't
+        // lose these overrides.
+        for (const [name, property] of Object.entries(unverifiedProperties)) {
+          if (property.type !== "TEXT" || typeof property.value !== "string") {
+            continue;
+          }
+
+          const textLayer = f.findOne(
+            (n) =>
+              n.type === "TEXT" &&
+              // TODO: We need a better matching algorithm here.
+              n.name.toLowerCase() === name
+          ) as TextNode | null;
+
+          if (!textLayer) {
+            continue;
+          }
+
+          // TODO: This is a dumb temporary fix to get around the fact
+          // that we don't load fonts for components (yet).
+          if (textLayer.fontName !== figma.mixed) {
+            figma.loadFontAsync(textLayer.fontName).then(() => {
+              textLayer.characters = property.value as string;
+            });
+          }
+        }
+
+        // TODO: Discuss with Andrew whether we should or shouldn't
+        // safe apply the other properties (maybe only if they're non default?)
         addToParent(f);
         safeApplyLayoutMode(f, {
           layoutMode,
@@ -666,7 +704,6 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           strokesIncludedInLayout
         });
         resizeOrLog(f, width, height);
-        safeAssign(f, rest);
         applyPluginData(f, pluginData);
         n = f;
         break;
