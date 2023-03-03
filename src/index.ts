@@ -110,27 +110,41 @@ const defaultOptions: Options = {
 };
 
 function conditionalReadBlacklist(n: any, options: Pick<Options, "geometry">) {
+  let conditionalBlacklist = new Set([...readBlacklist]);
+
+  // Only read componentPropertyDefinitions if n is a
+  // non-variant component or a component set to avoid errors.
+  if (
+    "type" in n &&
+    (n.type !== "COMPONENT" || n.parent) &&
+    n.type !== "COMPONENT_SET"
+  ) {
+    conditionalBlacklist.add("componentPropertyDefinitions");
+  }
+
   // Ignore geometry keys if geometry is set to "none"
   // Copied these keys from the Figma REST API.
   // "size" represents width/height of elements and is different
   // from the width/height of the bounding box:
   // https://www.figma.com/developers/api#frame-props
   if (options.geometry === "none") {
-    return new Set([
-      ...readBlacklist,
+    conditionalBlacklist = new Set([
+      ...conditionalBlacklist,
       "fillGeometry",
       "strokeGeometry",
       "size",
       "relativeTransform"
     ]);
+  } else if ("type" in n && n.type === "TEXT") {
+    // Never include text outline geometry
+    conditionalBlacklist = new Set([
+      ...conditionalBlacklist,
+      "fillGeometry",
+      "strokeGeometry"
+    ]);
   }
 
-  // Never include text outline geometry
-  if ("type" in n && n.type === "TEXT") {
-    return new Set([...readBlacklist, "fillGeometry", "strokeGeometry"]);
-  }
-
-  return readBlacklist;
+  return conditionalBlacklist;
 }
 
 type AnyObject = { [name: string]: any };
@@ -147,20 +161,7 @@ class DumpContext {
 
 function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
   return keys.reduce((o, k) => {
-    let v: any;
-
-    // Get the value of the key.
-    // If the key is componentPropertyDefinitions, we only want to get
-    // the value if the node is a component/component set to avoid errors.
-    if (
-      k !== "componentPropertyDefinitions" ||
-      (n.type === "COMPONENT" && !n.parent) ||
-      n.type === "COMPONENT_SET"
-    ) {
-      v = n[k];
-    } else {
-      v = undefined;
-    }
+    const v = n[k];
 
     if (k === "imageHash" && typeof v === "string") {
       ctx.imageHashes.add(v);
