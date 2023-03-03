@@ -660,7 +660,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           )
         );
         f.setProperties(properties);
-        applyOverridesToChildren(f, json.children);
+        applyOverridesToChildren(f, json);
         addToParent(f);
         safeApplyLayoutMode(f, {
           layoutMode,
@@ -792,5 +792,3 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
     })
     .filter(notUndefined);
 }
-
-export type SupportedProperties = "characters" | "opacity";
