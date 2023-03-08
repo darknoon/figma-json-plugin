@@ -1,6 +1,6 @@
 import os from "os";
 import path from "path";
-import puppeteer, { Browser, Page as PuppeteerPage } from "puppeteer";
+import puppeteer, { Browser, Page as PuppeteerPage } from "puppeteer-core";
 import NodeEnvironment from "jest-environment-node";
 import { EnvironmentContext, JestEnvironmentConfig } from "@jest/environment";
 import { readFile } from "fs/promises";

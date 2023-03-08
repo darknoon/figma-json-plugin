@@ -2,7 +2,7 @@
  * @jest-environment ./src/testUtil/figmaEnvironment.ts
  */
 import { dump } from ".";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import os from "os";
