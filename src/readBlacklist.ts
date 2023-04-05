@@ -52,6 +52,10 @@ const _textLayerWithGeomBlacklist = new Set([
   ..._defaultBlacklist
 ]);
 
+function isOkToReadBackgrounds(n: any) {
+  return "type" in n && n.type === "PAGE";
+}
+
 export function conditionalReadBlacklistSimple(
   n: any,
   options: Pick<Options, "geometry">
@@ -67,6 +71,11 @@ export function conditionalReadBlacklistSimple(
         (!n.parent || n.parent.type !== "COMPONENT_SET")));
   if (!okToReadDefs) {
     conditionalBlacklist.add("componentPropertyDefinitions");
+  }
+
+  if (!isOkToReadBackgrounds(n)) {
+    conditionalBlacklist.add("backgrounds");
+    conditionalBlacklist.add("backgroundStyleId");
   }
 
   // Ignore geometry keys if geometry is set to "none"

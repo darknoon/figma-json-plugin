@@ -60,3 +60,31 @@ test.each(TestMatrix)(
     expect(fn(l, opts)).toContain("componentPropertyDefinitions");
   }
 );
+
+describe("exclude deprecated background properties for all nodes but page", () => {
+  test.each(TestMatrix)(
+    "page has background properties ($name) geom = $opts.geometry",
+    ({ fn, opts }) => {
+      const l = { type: "PAGE" };
+      expect(fn(l, opts)).not.toContain("backgrounds");
+      expect(fn(l, opts)).not.toContain("backgroundStyleId");
+    }
+  );
+
+  test.each(TestMatrix)(
+    "non-page nodes don't have background properties ($name) geom = $opts.geometry",
+    ({ fn, opts }) => {
+      const t = { type: "TEXT" };
+      expect(fn(t, opts)).toContain("backgrounds");
+      expect(fn(t, opts)).toContain("backgroundStyleId");
+
+      const cs = { type: "COMPONENT_SET" };
+      expect(fn(cs, opts)).toContain("backgrounds");
+      expect(fn(cs, opts)).toContain("backgroundStyleId");
+
+      const f = { type: "FRAME" };
+      expect(fn(f, opts)).toContain("backgrounds");
+      expect(fn(f, opts)).toContain("backgroundStyleId");
+    }
+  );
+});
