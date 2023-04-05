@@ -39,10 +39,5 @@ export default function updateImageHashes(
     n.fills = fixFills(n.fills);
   }
 
-  // fix images in backgrounds
-  if ("backgrounds" in n && n.backgrounds !== undefined) {
-    n.backgrounds = fixFills(n.backgrounds);
-  }
-
   return n;
 }
