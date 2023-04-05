@@ -718,8 +718,10 @@ export interface BlendMixin extends MinimalBlendMixin {
 
 export interface ContainerMixin {
   expanded: boolean;
-  backgrounds: ReadonlyArray<Paint>; // DEPRECATED: use 'fills' instead
-  backgroundStyleId: string; // DEPRECATED: use 'fillStyleId' instead
+  // DEPRECATED: use 'fills' instead
+  // backgrounds: ReadonlyArray<Paint>;
+  // DEPRECATED: use 'fillStyleId' instead
+  // backgroundStyleId: string;
 }
 
 export type StrokeCap =

@@ -556,20 +556,6 @@ const defaultLayers: {
     strokeRightWeight: 1,
     layoutGrids: [],
     gridStyleId: "",
-    backgrounds: [
-      {
-        type: "SOLID",
-        visible: true,
-        opacity: 1,
-        blendMode: "NORMAL",
-        color: {
-          r: 1,
-          g: 1,
-          b: 1
-        }
-      }
-    ],
-    backgroundStyleId: "",
     clipsContent: true,
     guides: [],
     expanded: true,

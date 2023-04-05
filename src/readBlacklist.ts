@@ -30,27 +30,45 @@ export const readBlacklist = new Set([
 
 const _tooManyPoints = ["fillGeometry", "strokeGeometry"];
 const _relativeTransformEtc = ["size", "relativeTransform"];
+const _backgrounds = ["backgrounds", "backgroundStyleId"];
 const _defaultBlacklist = new Set([
   ...readBlacklist,
   "componentPropertyDefinitions"
 ]);
-const _noGeometryBlacklist = new Set([..._defaultBlacklist, ..._tooManyPoints]);
+const _defaultBlacklistNoBackgrounds = new Set([
+  ..._defaultBlacklist,
+  ..._backgrounds
+]);
 
-const _okToReadDefsWithGeomBlacklist = new Set([...readBlacklist]);
+const _noGeometryBlacklist = new Set([..._defaultBlacklist, ..._tooManyPoints]);
+const _noGeometryNoBackgroundsBlacklist = new Set([
+  ..._noGeometryBlacklist,
+  ..._backgrounds
+]);
+
+const _okToReadDefsWithGeomBlacklist = new Set([
+  ...readBlacklist,
+  ..._backgrounds
+]);
 const _okToReadDefsNoGeomBlacklist = new Set([
   ...readBlacklist,
-  _tooManyPoints
+  ..._tooManyPoints,
+  ..._backgrounds
 ]);
 const _textLayerNoGeomBlacklist = new Set([
-  ..._defaultBlacklist,
+  ..._defaultBlacklistNoBackgrounds,
   ..._tooManyPoints,
   ..._relativeTransformEtc
 ]);
 
 const _textLayerWithGeomBlacklist = new Set([
   ..._tooManyPoints,
-  ..._defaultBlacklist
+  ..._defaultBlacklistNoBackgrounds
 ]);
+
+function isOkToReadBackgrounds(n: any) {
+  return "type" in n && n.type === "PAGE";
+}
 
 export function conditionalReadBlacklistSimple(
   n: any,
@@ -67,6 +85,11 @@ export function conditionalReadBlacklistSimple(
         (!n.parent || n.parent.type !== "COMPONENT_SET")));
   if (!okToReadDefs) {
     conditionalBlacklist.add("componentPropertyDefinitions");
+  }
+
+  if (!isOkToReadBackgrounds(n)) {
+    conditionalBlacklist.add("backgrounds");
+    conditionalBlacklist.add("backgroundStyleId");
   }
 
   // Ignore geometry keys if geometry is set to "none"
@@ -121,11 +144,17 @@ export function conditionalReadBlacklist(
     } else {
       return _okToReadDefsWithGeomBlacklist;
     }
-  } else {
+  } else if (isOkToReadBackgrounds(n)) {
     if (ignoreGeometry) {
       return _noGeometryBlacklist;
     } else {
       return _defaultBlacklist;
+    }
+  } else {
+    if (ignoreGeometry) {
+      return _noGeometryNoBackgroundsBlacklist;
+    } else {
+      return _defaultBlacklistNoBackgrounds;
     }
   }
 }
