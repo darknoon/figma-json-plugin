@@ -1,6 +1,6 @@
 import * as F from "./figma-json";
 import defaultLayers from "./figma-default-layers";
-import { dump } from ".";
+import { dump } from "./read";
 
 // Inject a fake figma object into the global scope as a hack
 beforeAll(() => {

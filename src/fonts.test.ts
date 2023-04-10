@@ -2,14 +2,9 @@ import { createFigma } from "figma-api-stub";
 import { Inter } from "figma-api-stub/dist/fonts";
 
 import * as F from "./figma-json";
-import {
-  dump,
-  fontsToLoad,
-  loadFonts,
-  fallbackFonts,
-  applyFontName,
-  encodeFont
-} from ".";
+import { fontsToLoad, loadFonts, applyFontName, encodeFont } from "./write";
+import { dump } from "./read";
+import { fallbackFonts } from "./fallbackFonts";
 
 const notInstalledFontFamily = "My Custom Font";
 

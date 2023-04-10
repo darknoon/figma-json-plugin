@@ -1,7 +1,7 @@
 import { createFigma } from "figma-api-stub";
 
 import * as F from "./figma-json";
-import { dump } from ".";
+import { dump } from "./read";
 
 beforeEach(() => {
   (globalThis as any).figma = createFigma({});

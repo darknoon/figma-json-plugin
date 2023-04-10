@@ -1,6 +1,6 @@
 /// <reference types="@figma/plugin-typings" />
 
-import { dump } from "./index";
+import { dump } from "./read";
 import * as F from "./figma-json";
 
 export default async function genDefaults() {
