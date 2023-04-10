@@ -9,5 +9,5 @@ export const fallbackFonts: F.FontName[] = [
   { family: "Inter", style: "Semi Bold" },
   { family: "Inter", style: "Bold" },
   { family: "Inter", style: "Extra Bold" },
-  { family: "Inter", style: "Black" }
+  { family: "Inter", style: "Black" },
 ];

@@ -2,7 +2,7 @@ import * as F from "./figma-json";
 
 export default function updateImageHashes(
   n: F.SceneNode,
-  updates: Map<string, string>
+  updates: Map<string, string>,
 ): F.SceneNode {
   // Shallow copy before modifying,
   // TODO(perf): return same if unmodified

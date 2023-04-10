@@ -25,7 +25,7 @@ export const readBlacklist = new Set([
   "canUpgradeToNativeBidiSupport",
   // Deprecated but Figma still exposes it
   "horizontalPadding",
-  "verticalPadding"
+  "verticalPadding",
 ]);
 
 const _tooManyPoints = ["fillGeometry", "strokeGeometry"];
@@ -33,37 +33,37 @@ const _relativeTransformEtc = ["size", "relativeTransform"];
 const _backgrounds = ["backgrounds", "backgroundStyleId"];
 const _defaultBlacklist = new Set([
   ...readBlacklist,
-  "componentPropertyDefinitions"
+  "componentPropertyDefinitions",
 ]);
 const _defaultBlacklistNoBackgrounds = new Set([
   ..._defaultBlacklist,
-  ..._backgrounds
+  ..._backgrounds,
 ]);
 
 const _noGeometryBlacklist = new Set([..._defaultBlacklist, ..._tooManyPoints]);
 const _noGeometryNoBackgroundsBlacklist = new Set([
   ..._noGeometryBlacklist,
-  ..._backgrounds
+  ..._backgrounds,
 ]);
 
 const _okToReadDefsWithGeomBlacklist = new Set([
   ...readBlacklist,
-  ..._backgrounds
+  ..._backgrounds,
 ]);
 const _okToReadDefsNoGeomBlacklist = new Set([
   ...readBlacklist,
   ..._tooManyPoints,
-  ..._backgrounds
+  ..._backgrounds,
 ]);
 const _textLayerNoGeomBlacklist = new Set([
   ..._defaultBlacklistNoBackgrounds,
   ..._tooManyPoints,
-  ..._relativeTransformEtc
+  ..._relativeTransformEtc,
 ]);
 
 const _textLayerWithGeomBlacklist = new Set([
   ..._tooManyPoints,
-  ..._defaultBlacklistNoBackgrounds
+  ..._defaultBlacklistNoBackgrounds,
 ]);
 
 function isOkToReadBackgrounds(n: any) {
@@ -72,7 +72,7 @@ function isOkToReadBackgrounds(n: any) {
 
 export function conditionalReadBlacklistSimple(
   n: any,
-  options: Pick<Options, "geometry">
+  options: Pick<Options, "geometry">,
 ) {
   let conditionalBlacklist = new Set([...readBlacklist]);
 
@@ -103,14 +103,14 @@ export function conditionalReadBlacklistSimple(
       "fillGeometry",
       "strokeGeometry",
       "size",
-      "relativeTransform"
+      "relativeTransform",
     ]);
   } else if ("type" in n && n.type === "TEXT") {
     // Never include text outline geometry
     conditionalBlacklist = new Set([
       ...conditionalBlacklist,
       "fillGeometry",
-      "strokeGeometry"
+      "strokeGeometry",
     ]);
   }
 
@@ -119,7 +119,7 @@ export function conditionalReadBlacklistSimple(
 
 export function conditionalReadBlacklist(
   n: any,
-  options: Pick<Options, "geometry">
+  options: Pick<Options, "geometry">,
 ) {
   // Only read componentPropertyDefinitions if n is a
   // non-variant component or a component set to avoid errors.

@@ -18,7 +18,7 @@ test("Takes components in the document and produces component ids like the REST 
     documentationLinks: [],
     description: "",
     remote: false,
-    parent: null
+    parent: null,
   };
 
   const sourceInstance = {
@@ -26,7 +26,7 @@ test("Takes components in the document and produces component ids like the REST 
     type: "INSTANCE",
     name: "Info Button",
     mainComponent: sourceComponent,
-    children: []
+    children: [],
   };
 
   const d = await dump([sourceInstance as any as InstanceNode]);
@@ -37,8 +37,8 @@ test("Takes components in the document and produces component ids like the REST 
       name: "Info Button",
       description: "",
       remote: false,
-      documentationLinks: []
-    }
+      documentationLinks: [],
+    },
   };
   expect(d.components).toEqual(expected);
   expect(d.componentSets).toEqual({});
@@ -50,7 +50,7 @@ test("Takes component sets in the document and produces component set ids like t
   const componentDefaults = {
     documentationLinks: [],
     description: "A rounded button with a few variants",
-    remote: false
+    remote: false,
   };
   const sourceComponent = {
     ...defaultLayers.FRAME,
@@ -61,7 +61,7 @@ test("Takes component sets in the document and produces component set ids like t
     parent: null as SceneNode | null,
     backgrounds: [{ type: "IMAGE", imageHash: "A", scaleMode: "FILL" }],
     ...componentDefaults,
-    description: "The primary large button"
+    description: "The primary large button",
   };
 
   const sourceInstance = {
@@ -69,7 +69,7 @@ test("Takes component sets in the document and produces component set ids like t
     type: "INSTANCE",
     name: "Checkout Button",
     mainComponent: sourceComponent,
-    children: []
+    children: [],
   };
 
   const sourceComponentSet = {
@@ -80,7 +80,7 @@ test("Takes component sets in the document and produces component set ids like t
     id: "123:789",
     // This isn't used currently, but just making sure we simulate the real thing
     children: [sourceComponent as any as ComponentNode],
-    ...componentDefaults
+    ...componentDefaults,
   };
 
   sourceComponent["parent"] = sourceComponentSet as any as ComponentSetNode;
@@ -94,8 +94,8 @@ test("Takes component sets in the document and produces component set ids like t
       description: "The primary large button",
       remote: false,
       documentationLinks: [],
-      componentSetId: "123:789"
-    }
+      componentSetId: "123:789",
+    },
   };
   const componentSets: F.ComponentSetMap = {
     "123:789": {
@@ -103,8 +103,8 @@ test("Takes component sets in the document and produces component set ids like t
       name: "Rounded Button",
       description: "A rounded button with a few variants",
       documentationLinks: [],
-      remote: false
-    }
+      remote: false,
+    },
   };
   expect(d.components).toEqual(components);
   expect(d.componentSets).toEqual(componentSets);

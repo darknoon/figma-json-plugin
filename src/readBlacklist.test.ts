@@ -1,7 +1,7 @@
 import { Options } from ".";
 import {
   conditionalReadBlacklist as fast,
-  conditionalReadBlacklistSimple as simple
+  conditionalReadBlacklistSimple as simple,
 } from "./readBlacklist";
 
 const TestMatrix: {
@@ -12,7 +12,7 @@ const TestMatrix: {
   { name: "simple", fn: simple, opts: { geometry: "none" } },
   { name: "fast", fn: fast, opts: { geometry: "none" } },
   { name: "simple", fn: simple, opts: { geometry: "paths" } },
-  { name: "fast", fn: fast, opts: { geometry: "paths" } }
+  { name: "fast", fn: fast, opts: { geometry: "paths" } },
 ];
 
 test.each(TestMatrix)(
@@ -20,7 +20,7 @@ test.each(TestMatrix)(
   ({ fn, opts }) => {
     const l = { type: "TEXT" };
     expect(fn(l, opts)).toContain("fillGeometry");
-  }
+  },
 );
 
 test.each(TestMatrix)(
@@ -32,16 +32,16 @@ test.each(TestMatrix)(
     } else {
       expect(fn(l, opts)).not.toContain("fillGeometry");
     }
-  }
+  },
 );
 
 test("component that has component set parent doesn't allow componentPropertyDefinitions", () => {
   const l = { type: "COMPONENT", parent: { type: "COMPONENT_SET" } };
   expect(simple(l, { geometry: "none" })).toContain(
-    "componentPropertyDefinitions"
+    "componentPropertyDefinitions",
   );
   expect(fast(l, { geometry: "none" })).toContain(
-    "componentPropertyDefinitions"
+    "componentPropertyDefinitions",
   );
 });
 
@@ -50,7 +50,7 @@ test.each(TestMatrix)(
   ({ fn, opts }) => {
     const l = { type: "COMPONENT", parent: { type: "FRAME" } };
     expect(fn(l, opts)).not.toContain("componentPropertyDefinitions");
-  }
+  },
 );
 
 test.each(TestMatrix)(
@@ -58,7 +58,7 @@ test.each(TestMatrix)(
   ({ fn, opts }) => {
     const l = { type: "STAR", parent: { type: "FRAME" } };
     expect(fn(l, opts)).toContain("componentPropertyDefinitions");
-  }
+  },
 );
 
 describe("exclude deprecated background properties for all nodes but page", () => {
@@ -68,7 +68,7 @@ describe("exclude deprecated background properties for all nodes but page", () =
       const l = { type: "PAGE" };
       expect(fn(l, opts)).not.toContain("backgrounds");
       expect(fn(l, opts)).not.toContain("backgroundStyleId");
-    }
+    },
   );
 
   test.each(TestMatrix)(
@@ -85,6 +85,6 @@ describe("exclude deprecated background properties for all nodes but page", () =
       const f = { type: "FRAME" };
       expect(fn(f, opts)).toContain("backgrounds");
       expect(fn(f, opts)).toContain("backgroundStyleId");
-    }
+    },
   );
 });

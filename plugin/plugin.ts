@@ -66,7 +66,7 @@ figma.on("close", () => {
 
 async function tellUIAboutStoredText() {
   const l: F.FrameNode = {
-    ...defaultLayers.FRAME
+    ...defaultLayers.FRAME,
   };
 
   const basic: F.DumpedFigma = {
@@ -74,11 +74,11 @@ async function tellUIAboutStoredText() {
     components: {},
     componentSets: {},
     images: {},
-    styles: {}
+    styles: {},
   };
   postMessage({
     type: "updateInsertText",
-    recentInsertText: JSON.stringify(basic, null, 2)
+    recentInsertText: JSON.stringify(basic, null, 2),
   });
 }
 

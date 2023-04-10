@@ -1,6 +1,6 @@
 module.exports = {
   transform: {
-    "^.+\\.tsx?$": "esbuild-jest"
+    "^.+\\.tsx?$": "esbuild-jest",
   },
-  roots: ["./src"]
+  roots: ["./src"],
 };

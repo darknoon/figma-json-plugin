@@ -2,7 +2,7 @@
 export {
   type DumpOptions as Options,
   type DumpOptions,
-  isVisible
+  isVisible,
 } from "./read";
 export { insert, fontsToLoad } from "./write";
 

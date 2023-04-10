@@ -2,7 +2,7 @@ import { conditionalReadBlacklist } from "./readBlacklist";
 import * as F from "./figma-json";
 import {
   saveFigmaState as useFigmaState,
-  restoreFigmaState
+  restoreFigmaState,
 } from "./figmaState";
 
 export interface DumpOptions {
@@ -38,7 +38,7 @@ const defaultOptions: DumpOptions = {
   // TODO: Investigate why reading images makes the plugin crash. Otherwise we could have this be true by default.
   images: false,
   geometry: "none",
-  styles: false
+  styles: false,
 };
 type AnyObject = { [name: string]: any };
 class DumpContext {
@@ -69,7 +69,7 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
           name: style.name,
           styleType: style.type,
           remote: style.remote,
-          description: style.description
+          description: style.description,
         };
       } else {
         console.warn(`Couldn't find style with id ${v}.`);
@@ -89,7 +89,7 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
           name,
           description,
           remote,
-          documentationLinks
+          documentationLinks,
         };
       }
       const { name, key, description, documentationLinks, remote } = component;
@@ -99,7 +99,7 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
         description,
         remote,
         componentSetId,
-        documentationLinks
+        documentationLinks,
       };
       o["componentId"] = v.id;
       return o;
@@ -121,7 +121,7 @@ function _dump(n: any, ctx: DumpContext): any {
         // Merge keys from __proto__ with natural keys
         const blacklistKeys = conditionalReadBlacklist(n, ctx.options);
         const keys = [...Object.keys(n), ...Object.keys(n.__proto__)].filter(
-          (k) => !blacklistKeys.has(k)
+          (k) => !blacklistKeys.has(k),
         );
         return _dumpObject(n, keys, ctx);
       } else {
@@ -159,7 +159,7 @@ async function requestImages(ctx: DumpContext): Promise<F.ImageMap> {
 
 export async function dump(
   n: readonly SceneNode[],
-  options: Partial<DumpOptions> = {}
+  options: Partial<DumpOptions> = {},
 ): Promise<F.DumpedFigma> {
   const resolvedOptions: DumpOptions = { ...defaultOptions, ...options };
   const { skipInvisibleNodes } = resolvedOptions;
@@ -188,6 +188,6 @@ export async function dump(
     components,
     componentSets,
     styles,
-    images
+    images,
   };
 }

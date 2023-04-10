@@ -33,9 +33,9 @@ const defaultLayers: {
         color: {
           r: 0.8509804010391235,
           g: 0.8509804010391235,
-          b: 0.8509804010391235
-        }
-      }
+          b: 0.8509804010391235,
+        },
+      },
     ],
     fillStyleId: "",
     strokes: [],
@@ -49,13 +49,13 @@ const defaultLayers: {
     fillGeometry: [
       {
         windingRule: "NONZERO",
-        data: "M0 0L100 0L100 100L0 100L0 0Z"
-      }
+        data: "M0 0L100 0L100 100L0 100L0 0Z",
+      },
     ],
     strokeGeometry: [],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -69,7 +69,7 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     cornerRadius: 0,
     cornerSmoothing: 0,
@@ -82,7 +82,7 @@ const defaultLayers: {
     strokeBottomWeight: 1,
     strokeLeftWeight: 1,
     strokeRightWeight: 1,
-    type: "RECTANGLE"
+    type: "RECTANGLE",
   },
   LINE: {
     id: "_",
@@ -106,9 +106,9 @@ const defaultLayers: {
         color: {
           r: 0,
           g: 0,
-          b: 0
-        }
-      }
+          b: 0,
+        },
+      },
     ],
     strokeStyleId: "",
     strokeWeight: 1,
@@ -121,12 +121,12 @@ const defaultLayers: {
     strokeGeometry: [
       {
         windingRule: "NONZERO",
-        data: "M0 0L100 0L100 -1L0 -1L0 0Z"
-      }
+        data: "M0 0L100 0L100 -1L0 -1L0 0Z",
+      },
     ],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -140,10 +140,10 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     reactions: [],
-    type: "LINE"
+    type: "LINE",
   },
   ELLIPSE: {
     id: "_",
@@ -165,9 +165,9 @@ const defaultLayers: {
         color: {
           r: 0.8509804010391235,
           g: 0.8509804010391235,
-          b: 0.8509804010391235
-        }
-      }
+          b: 0.8509804010391235,
+        },
+      },
     ],
     fillStyleId: "",
     strokes: [],
@@ -181,13 +181,13 @@ const defaultLayers: {
     fillGeometry: [
       {
         windingRule: "NONZERO",
-        data: "M100 50C100 77.6142 77.6142 100 50 100C22.3858 100 0 77.6142 0 50C0 22.3858 22.3858 0 50 0C77.6142 0 100 22.3858 100 50Z"
-      }
+        data: "M100 50C100 77.6142 77.6142 100 50 100C22.3858 100 0 77.6142 0 50C0 22.3858 22.3858 0 50 0C77.6142 0 100 22.3858 100 50Z",
+      },
     ],
     strokeGeometry: [],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -201,17 +201,17 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     cornerRadius: 0,
     cornerSmoothing: 0,
     arcData: {
       startingAngle: 0,
       endingAngle: 6.2831854820251465,
-      innerRadius: 0
+      innerRadius: 0,
     },
     reactions: [],
-    type: "ELLIPSE"
+    type: "ELLIPSE",
   },
   POLYGON: {
     id: "_",
@@ -233,9 +233,9 @@ const defaultLayers: {
         color: {
           r: 0.8509804010391235,
           g: 0.8509804010391235,
-          b: 0.8509804010391235
-        }
-      }
+          b: 0.8509804010391235,
+        },
+      },
     ],
     fillStyleId: "",
     strokes: [],
@@ -249,13 +249,13 @@ const defaultLayers: {
     fillGeometry: [
       {
         windingRule: "NONZERO",
-        data: "M50 0L93.3013 75L6.69873 75L50 0Z"
-      }
+        data: "M50 0L93.3013 75L6.69873 75L50 0Z",
+      },
     ],
     strokeGeometry: [],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -269,13 +269,13 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     cornerRadius: 0,
     cornerSmoothing: 0,
     pointCount: 3,
     reactions: [],
-    type: "POLYGON"
+    type: "POLYGON",
   },
   STAR: {
     id: "_",
@@ -297,9 +297,9 @@ const defaultLayers: {
         color: {
           r: 0.8509804010391235,
           g: 0.8509804010391235,
-          b: 0.8509804010391235
-        }
-      }
+          b: 0.8509804010391235,
+        },
+      },
     ],
     fillStyleId: "",
     strokes: [],
@@ -313,13 +313,13 @@ const defaultLayers: {
     fillGeometry: [
       {
         windingRule: "NONZERO",
-        data: "M50 0L61.2257 34.5491L97.5528 34.5491L68.1636 55.9017L79.3893 90.4509L50 69.0983L20.6107 90.4509L31.8364 55.9017L2.44717 34.5491L38.7743 34.5491L50 0Z"
-      }
+        data: "M50 0L61.2257 34.5491L97.5528 34.5491L68.1636 55.9017L79.3893 90.4509L50 69.0983L20.6107 90.4509L31.8364 55.9017L2.44717 34.5491L38.7743 34.5491L50 0Z",
+      },
     ],
     strokeGeometry: [],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -333,14 +333,14 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     cornerRadius: 0,
     cornerSmoothing: 0,
     pointCount: 5,
     innerRadius: 0.3819660246372223,
     reactions: [],
-    type: "STAR"
+    type: "STAR",
   },
   VECTOR: {
     id: "_",
@@ -364,9 +364,9 @@ const defaultLayers: {
         color: {
           r: 0,
           g: 0,
-          b: 0
-        }
-      }
+          b: 0,
+        },
+      },
     ],
     strokeStyleId: "",
     strokeWeight: 1,
@@ -379,7 +379,7 @@ const defaultLayers: {
     strokeGeometry: [],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -393,14 +393,14 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     cornerRadius: 0,
     cornerSmoothing: 0,
     vectorPaths: [],
     handleMirroring: "NONE",
     reactions: [],
-    type: "VECTOR"
+    type: "VECTOR",
   },
   TEXT: {
     id: "_",
@@ -422,9 +422,9 @@ const defaultLayers: {
         color: {
           r: 0,
           g: 0,
-          b: 0
-        }
-      }
+          b: 0,
+        },
+      },
     ],
     fillStyleId: "",
     strokes: [],
@@ -439,7 +439,7 @@ const defaultLayers: {
     strokeGeometry: [],
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -453,7 +453,7 @@ const defaultLayers: {
     exportSettings: [],
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     characters: "",
     fontSize: 12,
@@ -463,14 +463,14 @@ const defaultLayers: {
     textDecoration: "NONE",
     letterSpacing: {
       unit: "PERCENT",
-      value: 0
+      value: 0,
     },
     lineHeight: {
-      unit: "AUTO"
+      unit: "AUTO",
     },
     fontName: {
       family: "Inter",
-      style: "Regular"
+      style: "Regular",
     },
     fontWeight: 400,
     hyperlink: null,
@@ -480,7 +480,7 @@ const defaultLayers: {
     textAutoResize: "WIDTH_AND_HEIGHT",
     textStyleId: "",
     reactions: [],
-    type: "TEXT"
+    type: "TEXT",
   },
   FRAME: {
     id: "_",
@@ -495,7 +495,7 @@ const defaultLayers: {
     effectStyleId: "",
     relativeTransform: [
       [1, 0, 0],
-      [0, 1, 0]
+      [0, 1, 0],
     ],
     x: 0,
     y: 0,
@@ -517,9 +517,9 @@ const defaultLayers: {
         color: {
           r: 1,
           g: 1,
-          b: 1
-        }
-      }
+          b: 1,
+        },
+      },
     ],
     fillStyleId: "",
     strokes: [],
@@ -533,8 +533,8 @@ const defaultLayers: {
     fillGeometry: [
       {
         windingRule: "NONZERO",
-        data: "M0 0L100 0L100 100L0 100L0 0Z"
-      }
+        data: "M0 0L100 0L100 100L0 100L0 0Z",
+      },
     ],
     strokeGeometry: [],
     cornerRadius: 0,
@@ -561,7 +561,7 @@ const defaultLayers: {
     expanded: true,
     constraints: {
       horizontal: "MIN",
-      vertical: "MIN"
+      vertical: "MIN",
     },
     layoutMode: "NONE",
     counterAxisSizingMode: "FIXED",
@@ -570,13 +570,13 @@ const defaultLayers: {
     numberOfFixedChildren: 0,
     overlayPositionType: "CENTER",
     overlayBackground: {
-      type: "NONE"
+      type: "NONE",
     },
     overlayBackgroundInteraction: "NONE",
     itemReverseZIndex: false,
     strokesIncludedInLayout: false,
     reactions: [],
-    type: "FRAME"
+    type: "FRAME",
   },
   PAGE: {
     id: "_",
@@ -594,9 +594,9 @@ const defaultLayers: {
         color: {
           r: 0.9624999761581421,
           g: 0.9624999761581421,
-          b: 0.9624999761581421
-        }
-      }
+          b: 0.9624999761581421,
+        },
+      },
     ],
     exportSettings: [],
     prototypeStartNode: null,
@@ -610,12 +610,12 @@ const defaultLayers: {
         color: {
           r: 0,
           g: 0,
-          b: 0
-        }
-      }
+          b: 0,
+        },
+      },
     ],
-    type: "PAGE"
-  }
+    type: "PAGE",
+  },
 };
 
 export default defaultLayers;

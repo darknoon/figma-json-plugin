@@ -19,7 +19,7 @@ export const writeBlacklist = new Set([
   // Not part of the Figma Plugin API
   "inferredAutoLayout",
   "componentId",
-  "isAsset"
+  "isAsset",
 ]);
 function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
@@ -29,7 +29,7 @@ function notUndefined<T>(x: T | undefined): x is T {
 
 export async function loadFonts(
   requestedFonts: F.FontName[],
-  fallbackFonts: F.FontName[]
+  fallbackFonts: F.FontName[],
 ): Promise<{
   availableFonts: F.FontName[];
   missingFonts: F.FontName[];
@@ -56,7 +56,7 @@ export async function loadFonts(
         fontReplacements[encodeFont(fontName)] = encodeFont(replacement);
       } catch (e) {
         console.warn(
-          `Unable to load font replacement: ${encodeFont(replacement)}`
+          `Unable to load font replacement: ${encodeFont(replacement)}`,
         );
         // Assumes Inter Regular is always available
         fontReplacements[encodeFont(fontName)] = encodeFont(fallbackFonts[0]);
@@ -92,7 +92,7 @@ async function loadComponents(requestedComponents: F.ComponentMap) {
           console.log("error loading component:", e);
         }
       }
-    })
+    }),
   );
 
   return { availableComponents };
@@ -114,7 +114,7 @@ async function loadStyles(requestedStyles: F.StyleMap) {
         // We don't care regardless because it's pre-loaded in that case.
         console.log("error loading style:", e);
       }
-    })
+    }),
   );
 }
 // Format is "Family|Style"
@@ -139,7 +139,7 @@ export function decodeFont(f: EncodedFont): FontName {
 export async function applyFontName(
   n: TextNode,
   fontName: F.TextNode["fontName"],
-  fontReplacements: Record<EncodedFont, EncodedFont>
+  fontReplacements: Record<EncodedFont, EncodedFont>,
 ) {
   if (fontName === "__Symbol(figma.mixed)__") {
     return;
@@ -156,7 +156,7 @@ export async function applyFontName(
 
 export function getFontReplacement(
   missingFont: FontName,
-  fallbackFonts: F.FontName[]
+  fallbackFonts: F.FontName[],
 ): F.FontName {
   const replacement = fallbackFonts.find((f) => f.style === missingFont.style);
 
@@ -170,7 +170,7 @@ function resizeOrLog(
   f: LayoutMixin,
   width: number,
   height: number,
-  withoutConstraints?: boolean
+  withoutConstraints?: boolean,
 ) {
   if (width > 0.01 && height > 0.01) {
     if (withoutConstraints) {
@@ -187,8 +187,8 @@ function resizeOrLog(
       `Couldn't resize item: ${JSON.stringify({
         type,
         width,
-        height
-      })}`
+        height,
+      })}`,
     );
   }
 }
@@ -257,7 +257,7 @@ function safeAssign<T>(n: T, dict: PartialTransformingMixedValues<T>) {
 }
 function applyPluginData(
   n: BaseNodeMixin,
-  pluginData: F.SceneNode["pluginData"]
+  pluginData: F.SceneNode["pluginData"],
 ) {
   if (pluginData === undefined) {
     return;
@@ -275,7 +275,7 @@ function safeApplyLayoutMode(
     layoutMode: F.BaseFrameMixin["layoutMode"];
     itemReverseZIndex: F.BaseFrameMixin["itemReverseZIndex"];
     strokesIncludedInLayout: F.BaseFrameMixin["strokesIncludedInLayout"];
-  }
+  },
 ) {
   const { layoutMode, itemReverseZIndex, strokesIncludedInLayout } = dict;
   f.layoutMode = layoutMode;
@@ -294,7 +294,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   const [{ fontReplacements }, { availableComponents }] = await Promise.all([
     loadFonts(fontsToLoad(n), fallbackFonts),
     loadComponents(n.components),
-    loadStyles(n.styles)
+    loadStyles(n.styles),
   ]);
 
   // Create all images
@@ -318,7 +318,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
   console.log("inserting.");
   const insertSceneNode = (
     json: F.SceneNode,
-    target: BaseNode & ChildrenMixin
+    target: BaseNode & ChildrenMixin,
   ): SceneNode | undefined => {
     // Using lambdas here to make sure figma is bound as this
     // TODO: experiment whether this is necessary
@@ -334,14 +334,14 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
       COMPONENT: () => figma.createComponent(),
       INSTANCE: (
         componentId: F.InstanceNode["componentId"],
-        availableComponents: Record<string, ComponentNode>
+        availableComponents: Record<string, ComponentNode>,
       ) => {
         const component = availableComponents[componentId];
         if (!component) {
           throw new Error("Couldn't find component");
         }
         return component.createInstance();
-      }
+      },
       // Not sceneNodes…
       // createPage(): PageNode;
       // createSlice(): SliceNode;
@@ -384,8 +384,8 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
 
         const properties = Object.fromEntries(
           Object.entries(componentProperties).map(
-            ([propertyName, { value }]) => [propertyName, value]
-          )
+            ([propertyName, { value }]) => [propertyName, value],
+          ),
         );
         f.setProperties(properties);
         applyOverridesToChildren(f, json);
@@ -393,7 +393,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         safeApplyLayoutMode(f, {
           layoutMode,
           itemReverseZIndex,
-          strokesIncludedInLayout
+          strokesIncludedInLayout,
         });
         resizeOrLog(f, width, height);
         safeAssign(f, rest);
@@ -422,7 +422,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
         safeApplyLayoutMode(f, {
           layoutMode,
           itemReverseZIndex,
-          strokesIncludedInLayout
+          strokesIncludedInLayout,
         });
         resizeOrLog(f, width, height);
         safeAssign(f, rest);
@@ -473,7 +473,7 @@ export async function insert(n: F.DumpedFigma): Promise<SceneNode[]> {
           f,
           rest as Partial<
             RectangleNode & EllipseNode & LineNode & PolygonNode & VectorNode
-          >
+          >,
         );
         applyPluginData(f, pluginData);
         resizeOrLog(f, width, height, true);

@@ -38,7 +38,7 @@ class InsertUI extends React.Component<{
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden"
+          overflow: "hidden",
         }}
       >
         <Toolbar>
@@ -60,13 +60,13 @@ class UI extends React.Component {
   state: UIState = {
     dump: undefined,
     showInsert: false,
-    inserting: false
+    inserting: false,
   };
 
   onMessage = (e: MessageEvent) => {
     console.log("on message", e);
     const {
-      data: { pluginMessage }
+      data: { pluginMessage },
     } = e;
     const message = pluginMessage as PluginToUIMessage;
 
@@ -121,10 +121,10 @@ class UI extends React.Component {
       {
         pluginMessage: {
           type: "insertTestCases",
-          data: []
-        }
+          data: [],
+        },
       },
-      "*"
+      "*",
     );
   };
 
@@ -157,7 +157,7 @@ class UI extends React.Component {
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden"
+            overflow: "hidden",
           }}
         >
           <Toolbar>
@@ -177,7 +177,7 @@ class UI extends React.Component {
               dump,
               (key: string, value: any) =>
                 value instanceof Uint8Array ? `<${value.length} bytes>` : value,
-              2
+              2,
             )}
           </pre>
           {/* <ReactJson src={dump} name={null} /> */}

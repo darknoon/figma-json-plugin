@@ -5,7 +5,7 @@ const doNothing = (e: React.MouseEvent) => {
 };
 
 export const InsertButton = ({
-  onInsert
+  onInsert,
 }: {
   onInsert: (e: React.MouseEvent) => void;
 }) => (
@@ -28,7 +28,7 @@ const Toolbar: React.FunctionComponent = ({ children }) => (
     style={{
       background: "white",
       borderBottom: "1px solid #eee",
-      height: 32
+      height: 32,
     }}
   >
     {children}

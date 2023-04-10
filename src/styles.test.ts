@@ -29,29 +29,29 @@ test("Creates a top-level styles object when styles option is true", async () =>
       name: paintStyle.name,
       styleType: paintStyle.type,
       remote: paintStyle.remote,
-      description: paintStyle.description
+      description: paintStyle.description,
     },
     [effectStyle.id]: {
       key: effectStyle.key,
       name: effectStyle.name,
       styleType: effectStyle.type,
       remote: effectStyle.remote,
-      description: effectStyle.description
+      description: effectStyle.description,
     },
     [textStyle.id]: {
       key: textStyle.key,
       name: textStyle.name,
       styleType: textStyle.type,
       remote: textStyle.remote,
-      description: textStyle.description
+      description: textStyle.description,
     },
     [gridStyle.id]: {
       key: gridStyle.key,
       name: gridStyle.name,
       styleType: gridStyle.type,
       remote: gridStyle.remote,
-      description: gridStyle.description
-    }
+      description: gridStyle.description,
+    },
   };
 
   expect(d.styles).toEqual(styleMap);
@@ -72,8 +72,8 @@ test("Doesn't include unused styles", async () => {
       name: paintStyle.name,
       styleType: paintStyle.type,
       remote: paintStyle.remote,
-      description: paintStyle.description
-    }
+      description: paintStyle.description,
+    },
   };
 
   expect(d.styles).toEqual(styleMap);
@@ -100,8 +100,8 @@ test("Doesn't include same style multiple times", async () => {
       name: paintStyle.name,
       styleType: paintStyle.type,
       remote: paintStyle.remote,
-      description: paintStyle.description
-    }
+      description: paintStyle.description,
+    },
   };
 
   expect(d.styles).toEqual(styleMap);
@@ -129,15 +129,15 @@ test("Handles multiple styles of same type", async () => {
       name: paintStyle.name,
       styleType: paintStyle.type,
       remote: paintStyle.remote,
-      description: paintStyle.description
+      description: paintStyle.description,
     },
     [secondPaintStyle.id]: {
       key: secondPaintStyle.key,
       name: secondPaintStyle.name,
       styleType: secondPaintStyle.type,
       remote: secondPaintStyle.remote,
-      description: secondPaintStyle.description
-    }
+      description: secondPaintStyle.description,
+    },
   };
 
   expect(d.styles).toEqual(styleMap);
@@ -209,6 +209,6 @@ function createStyles() {
     paintStyle,
     effectStyle,
     gridStyle,
-    textStyle
+    textStyle,
   };
 }

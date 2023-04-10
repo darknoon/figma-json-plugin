@@ -29,11 +29,11 @@ beforeEach(() => {
 test("Finds fonts to load", async () => {
   const installedFont = {
     family: "DIN Alternate",
-    style: "Regular"
+    style: "Regular",
   };
   const notInstalledFont = {
     family: notInstalledFontFamily,
-    style: "Regular"
+    style: "Regular",
   };
 
   const text1 = figma.createText();
@@ -63,7 +63,7 @@ test("Finds fonts to load", async () => {
   const expected: F.FontName[] = [
     Inter[0].fontName,
     installedFont,
-    notInstalledFont
+    notInstalledFont,
   ];
   expect(fonts).toEqual(expected);
 });
@@ -73,12 +73,12 @@ test("Loads fonts that user has installed", async () => {
     Inter[3].fontName,
     {
       family: "Avenir",
-      style: "Bold"
-    }
+      style: "Bold",
+    },
   ];
   const { availableFonts, missingFonts } = await loadFonts(
     requestedFonts,
-    fallbackFonts
+    fallbackFonts,
   );
 
   expect(availableFonts).toEqual(requestedFonts);
@@ -89,12 +89,12 @@ test("Detects missing fonts without choking", async () => {
   const requestedFonts: F.FontName[] = [
     {
       family: notInstalledFontFamily,
-      style: "Regular"
-    }
+      style: "Regular",
+    },
   ];
   const { availableFonts, missingFonts } = await loadFonts(
     requestedFonts,
-    fallbackFonts
+    fallbackFonts,
   );
 
   expect(availableFonts).toEqual([]);
@@ -104,38 +104,38 @@ test("Detects missing fonts without choking", async () => {
 test("Finds font replacements", async () => {
   const notInstalledFontBold = {
     family: notInstalledFontFamily,
-    style: "Bold"
+    style: "Bold",
   };
   const notInstalledFontSemiBold = {
     family: notInstalledFontFamily,
-    style: "Semi Bold"
+    style: "Semi Bold",
   };
   const notInstalledFontCustomStyle = {
     family: notInstalledFontFamily,
-    style: "Custom Style"
+    style: "Custom Style",
   };
 
   const requestedFonts: F.FontName[] = [
     notInstalledFontBold,
     notInstalledFontSemiBold,
-    notInstalledFontCustomStyle
+    notInstalledFontCustomStyle,
   ];
   const { fontReplacements } = await loadFonts(requestedFonts, fallbackFonts);
 
   expect(fontReplacements).toEqual({
     [encodeFont(notInstalledFontBold)]: encodeFont({
       family: "Inter",
-      style: "Bold"
+      style: "Bold",
     }),
     [encodeFont(notInstalledFontSemiBold)]: encodeFont({
       family: "Inter",
-      style: "Semi Bold"
+      style: "Semi Bold",
     }),
     // Default to Inter Regular
     [encodeFont(notInstalledFontCustomStyle)]: encodeFont({
       family: "Inter",
-      style: "Regular"
-    })
+      style: "Regular",
+    }),
   });
 });
 
@@ -153,17 +153,17 @@ test("Applies font", async () => {
   // Fonts to apply
   const installedFont = {
     family: "Georgia",
-    style: "Bold"
+    style: "Bold",
   };
   const notInstalledFont = {
     family: notInstalledFontFamily,
-    style: "Light"
+    style: "Light",
   };
   const mixedFont: F.Mixed = "__Symbol(figma.mixed)__";
 
   const { fontReplacements } = await loadFonts(
     [installedFont, notInstalledFont],
-    fallbackFonts
+    fallbackFonts,
   );
 
   applyFontName(text1, installedFont, fontReplacements);
@@ -174,7 +174,7 @@ test("Applies font", async () => {
   // Not installed font should be replaced with fallback
   expect(text2.fontName).toEqual({
     family: "Inter",
-    style: "Light"
+    style: "Light",
   });
   // Skips mixed fonts
   expect(text3.fontName).toEqual(originalFontText3);

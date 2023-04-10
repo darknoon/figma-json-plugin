@@ -4,7 +4,7 @@ import * as F from "./figma-json";
 export type SupportedProperties = "characters" | "opacity";
 
 function isSupported(
-  property: F.NodeChangeProperty
+  property: F.NodeChangeProperty,
 ): property is SupportedProperties {
   return property === "characters" || property === "opacity";
 }
@@ -15,7 +15,7 @@ function filterNulls<T>(arr: (T | null)[]): T[] {
 
 export function applyOverridesToChildren(
   instance: InstanceNode,
-  f: F.InstanceNode
+  f: F.InstanceNode,
 ) {
   const { overrides } = f;
   if (!overrides) {
@@ -27,12 +27,12 @@ export function applyOverridesToChildren(
       ({ id, overriddenFields }): [string, SupportedProperties[]] | null => {
         const sp = overriddenFields.filter(isSupported);
         return sp.length > 0 ? [id, sp] : null;
-      }
-    )
+      },
+    ),
   );
   // Overridden fields are keyed by node id
   const overriddenMap = new Map<string, SupportedProperties[]>(
-    supportedOverrides
+    supportedOverrides,
   );
   _recursive(instance, f, overriddenMap);
 }
@@ -40,21 +40,21 @@ export function applyOverridesToChildren(
 function _recursive(
   n: SceneNode & ChildrenMixin,
   f: F.SceneNode & F.ChildrenMixin,
-  overriddenMap: Map<string, SupportedProperties[]>
+  overriddenMap: Map<string, SupportedProperties[]>,
 ) {
   // Recursively find correspondences between n's children and j's children
   if (n.children.length !== f.children.length) {
     console.warn(
       `Instance children length mismatch ${n.children.length} vs ${f.children.length}: `,
       n,
-      f
+      f,
     );
   }
   for (let [node, json] of zip(n.children, f.children)) {
     // Basic sanity check that we're looking at the same thing
     if (node.type !== json.type) {
       console.warn(
-        `Instance children type mismatch: ${node.type} !== ${json.type}`
+        `Instance children type mismatch: ${node.type} !== ${json.type}`,
       );
     }
     // We know that these scene nodes correspond, so apply overrides
@@ -69,7 +69,7 @@ function _recursive(
 function _applyOverrides(
   n: SceneNode,
   j: F.SceneNode,
-  overriddenMap: Map<string, SupportedProperties[]>
+  overriddenMap: Map<string, SupportedProperties[]>,
 ) {
   // Do we have overrides for this node?
   const overriddenFields = overriddenMap.get(j.id);
