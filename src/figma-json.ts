@@ -925,7 +925,7 @@ export interface PageNode extends BaseNodeMixin, ChildrenMixin, ExportMixin {
   readonly type: "PAGE";
 
   guides: ReadonlyArray<Guide>;
-  selection: ReadonlyArray<SceneNode>;
+  //selection: ReadonlyArray<SceneNode>;
   selectedTextRange: { node: TextNode; start: number; end: number } | null;
   flowStartingPoints: ReadonlyArray<{ nodeId: string; name: string }>;
 

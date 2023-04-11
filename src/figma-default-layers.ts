@@ -583,7 +583,7 @@ const defaultLayers: {
     name: "Page",
     children: [],
     guides: [],
-    selection: [],
+    // selection: [],
     selectedTextRange: null,
     backgrounds: [
       {

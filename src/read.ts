@@ -10,6 +10,9 @@ export interface DumpOptions {
   images: boolean;
   geometry: "none" | "paths";
   styles: boolean;
+  // Depth after which to stop recursing into "children" arrays.
+  maxDepth: number;
+  childrenReplacement?: F.SceneNode;
 }
 
 // Returns true if n is a visible SceneNode or
@@ -39,7 +42,9 @@ const defaultOptions: DumpOptions = {
   images: false,
   geometry: "none",
   styles: false,
+  maxDepth: Infinity,
 };
+
 type AnyObject = { [name: string]: any };
 class DumpContext {
   constructor(public options: DumpOptions) {}
@@ -49,7 +54,16 @@ class DumpContext {
   components: F.ComponentMap = {};
   componentSets: F.ComponentSetMap = {};
   styles: F.StyleMap = {};
+
+  depth = 0;
+  pushParent() {
+    this.depth++;
+  }
+  popParent() {
+    this.depth--;
+  }
 }
+
 function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
   return keys.reduce((o, k) => {
     const v = n[k];
@@ -102,6 +116,19 @@ function _dumpObject(n: AnyObject, keys: readonly string[], ctx: DumpContext) {
         documentationLinks,
       };
       o["componentId"] = v.id;
+      return o;
+    } else if (k === "children") {
+      if (ctx.depth >= ctx.options.maxDepth) {
+        if (ctx.options.childrenReplacement) {
+          o[k] = [ctx.options.childrenReplacement];
+        } else {
+          o[k] = [];
+        }
+      } else {
+        ctx.pushParent();
+        o[k] = _dump(v, ctx);
+        ctx.popParent();
+      }
       return o;
     }
     o[k] = _dump(v, ctx);
