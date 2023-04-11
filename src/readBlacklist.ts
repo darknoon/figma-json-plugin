@@ -20,6 +20,7 @@ export const readBlacklist = new Set([
   "vectorNetwork",
   "masterComponent",
   // Figma exposes this but plugin types don't support them yet
+  "selection",
   "playbackSettings",
   "listSpacing",
   "canUpgradeToNativeBidiSupport",
