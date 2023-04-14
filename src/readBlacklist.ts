@@ -21,6 +21,7 @@ export const readBlacklist = new Set([
   "masterComponent",
   // Figma exposes this but plugin types don't support them yet
   "selection",
+  "hangingQuote",
   "playbackSettings",
   "listSpacing",
   "canUpgradeToNativeBidiSupport",
