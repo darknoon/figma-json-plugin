@@ -27,7 +27,7 @@
     "dist/"
   ],
   "devDependencies": {
-    "@figma/plugin-typings": "^1.58.0",
+    "@figma/plugin-typings": "https://github.com/figma/plugin-typings.git#readonly-preview",
     "@types/base64-js": "^1.2.5",
     "@types/jest": "^28.1.6",
     "@types/node": "^12.7.11",

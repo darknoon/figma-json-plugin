@@ -7,6 +7,7 @@ import {
 
 export interface DumpOptions {
   skipInvisibleNodes: boolean;
+  useExportAPI: boolean;
   images: boolean;
   geometry: "none" | "paths";
   styles: boolean;
@@ -33,14 +34,15 @@ export function isVisible(n: any) {
   return n.visible && n.opacity > 0.001 && !n.removed;
 }
 
-const defaultOptions: DumpOptions = {
+export const defaultOptions: DumpOptions = {
   skipInvisibleNodes: true,
+  useExportAPI: false,
   // TODO: Investigate why reading images makes the plugin crash. Otherwise we could have this be true by default.
   images: false,
   geometry: "none",
   styles: false,
 };
-type AnyObject = { [name: string]: any };
+type AnyObject = Record<string, any>;
 class DumpContext {
   constructor(public options: DumpOptions) {}
 

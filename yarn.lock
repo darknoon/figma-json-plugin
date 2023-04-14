@@ -326,10 +326,9 @@
   resolved "https://registry.yarnpkg.com/@emotion/unitless/-/unitless-0.7.5.tgz#77211291c1900a700b8a78cfafda3160d76949ed"
   integrity sha512-OWORNpfjMsSSUBVrRBVGECkhWcULOAJz9ZW8uK9qgxD+87M7jHRcvh/A96XXNhXTLmKcoYSQtBEX7lHMO7YRwg==
 
-"@figma/plugin-typings@^1.58.0":
-  version "1.58.0"
-  resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.58.0.tgz#88ae0e57e2ac74203d401f2a70e95e93c470e093"
-  integrity sha512-to6hFysqZYACz4VNgaBXflOVS+1pbXGNVcezDmQEMcADDkIZeAZ71Zfqf/B2YDRmU3sM1xX5Q5NkRGhjCuLOLg==
+"@figma/plugin-typings@https://github.com/figma/plugin-typings.git#readonly-preview":
+  version "1.62.0"
+  resolved "https://github.com/figma/plugin-typings.git#28d9cfd876564ebbf8e6658875a968a57c93e378"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
